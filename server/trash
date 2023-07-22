@@ -1,0 +1,69 @@
+void	configSyntax::checkBlock(const std::string& line, int& blocks)
+{
+	std::vector<std::string>	tokens;
+	static int	block_type;
+
+	tokens = Helpers::split(line, " \t");
+	for (size_t i = 0; i < tokens.size(); i++)
+	{
+		std::cout << blocks << std::endl;
+		if (tokens[i] == "{" && block_type)
+			blocks++;
+		else if (tokens[i] == "}")
+		{
+			block_type = (block_type == LOCATION_BLOCK) ? SERVER_BLOCK : 0x0;
+			blocks--;
+		}
+		else if ((tokens[i] == "server" && (block_type = SERVER_BLOCK)) || (block_type == SERVER_BLOCK && tokens[i] != "location"))
+			serverBlock((tokens[i] == "server" && blocks != 0));
+		else if ((tokens[i] == "location" && (block_type = LOCATION_BLOCK)) \
+					|| block_type == LOCATION_BLOCK)
+			locationBlock((tokens[i] == "location" && blocks != 1));
+		else
+			throw std::runtime_error("syntax error");
+	}
+}
+
+	static int	block_type;
+	static bool	insideBlock = false;
+
+	if (!level && token == "server")
+		throw std::runtime_error("syntax error+");
+	if (token == "{" && block_type == LOCATION_BLOCK)
+	{
+		blocks++;
+		insideBlock = true;
+		return ;
+	}
+	if (token == "}" && block_type == LOCATION_BLOCK)
+	{
+		insideBlock = false;
+		block_type = 0x0;
+		blocks--;
+		return ;
+	}
+	if ((token == "location" && (block_type = LOCATION_BLOCK)) || block_type == LOCATION_BLOCK)
+		locationBlock(token, (blocks == 1), insideBlock);
+
+
+
+		*//*/*/*/*/
+		// void	configSyntax::checkBlock(const std::string& line, int& blocks)
+// {
+// 	size_t		blockStart;
+// 	size_t		blockEnd;
+// 	std::string	blockName;
+
+// 	blockStart = line.find('{');
+// 	blockEnd = line.find('}');
+// 	if (blockStart != std::string::npos)
+// 	{
+// 		if (blockStart != 0)
+// 			blockName = line.substr(0, blockStart);
+// 		if ((blockName == "server" && blocks) || (blockName.substr(0, 9) == "location " && blocks != 1))
+// 			throw std::runtime_error("syntax error");
+// 		blocks++;
+// 	}
+// 	if (blockEnd != std::string::npos)
+// 		blocks--;
+// }
