@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/22 22:02:18 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/22 22:22:24 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,9 +122,9 @@ void	configSyntax::checkBlock(const std::string& line, int& blocks)
 
 std::string	configSyntax::syntaxEvaluation(std::ifstream& config_file)
 {
-	std::string	buffer;
-	std::string	current_line;
 	int			blocks = 0;
+	std::string	current_line;
+	std::string	buffer;
 
 	buffer = "";
 	while (std::getline(config_file, current_line))
