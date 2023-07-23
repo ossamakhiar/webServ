@@ -32,6 +32,16 @@ bool			Helpers::findElement(std::vector<std::string> vec, const std::string& ele
 	return (false);
 }
 
+size_t		Helpers::sepDistance(const std::string& buff, const char& c)
+{
+	size_t	i;
+
+	i = 0;
+	while (buff[i] && buff[i] != c)
+		i++;
+	return (i);
+}
+
 std::vector<std::string>	Helpers::split(std::string str, const std::string& charset)
 {
 	std::vector<std::string>	tokens;

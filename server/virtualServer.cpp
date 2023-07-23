@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/21 21:54:05 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/23 21:06:25 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,4 +22,46 @@ virtualServer::~virtualServer()
 
 }
 
+virtualServer::virtualServer(const virtualServer& other)
+{
+	*this = other;
+}
+
+virtualServer&	virtualServer::operator=(const virtualServer& rhs)
+{
+	if (this == &rhs)
+		return (*this);
+	endpoint = rhs.endpoint;
+	locations = rhs.locations;
+	server_name = rhs.server_name;
+	error_pages = rhs.error_pages;
+	// root = rhs.root;
+	return (*this);
+}
+
 // ? .......
+
+void	virtualServer::setServerName(const std::string& name)
+{
+	this->server_name = name;
+}
+
+void	virtualServer::setEndpoint(const std::string& listen)
+{
+	endpoint.first = listen;
+	endpoint.second = 80;
+}
+
+void	virtualServer::setErrorPage(const std::string& err)
+{
+	error_pages.push_back(std::pair<std::string, std::string>("404", err));
+}
+
+std::ostream& operator<<(std::ostream& os, const virtualServer& vs)
+{
+	os << "server_name: " << vs.server_name << std::endl;
+	os << "endpoint: " << vs.endpoint.first << "[" << vs.endpoint.second << "]" << std::endl;
+	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = vs.error_pages.begin(); it != vs.error_pages.end(); ++it)
+		os << "error_page: " << it->first << " ==> " << it->second << std::endl;
+	return (os);
+}

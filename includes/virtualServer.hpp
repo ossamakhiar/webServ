@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/22 21:27:36 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/23 21:18:07 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,10 @@ class	virtualServer
 private:
 	std::pair<std::string, int>							endpoint;// ** map host with port listening on
 	std::map<std::string, std::vector<std::string> >	locations; // ** map every location with its directives
+	std::vector<std::pair<std::string, std::string> >	error_pages;
 	std::string											server_name;
-	std::string											root;
+
+	int	max_client_body_size;
 
 public:
 	virtualServer();
@@ -32,6 +34,18 @@ public:
 	virtualServer(const virtualServer& other);
 	virtualServer&	operator=(const virtualServer& rhs);
 
+	void	setServerName(const std::string&);
+	void	setEndpoint(const std::string&);
+	void	setErrorPage(const std::string&);
+
+	const std::string& getServerName(void) const{
+		return server_name;
+	}
+
+	// ! remove this
+	friend std::ostream& operator<<(std::ostream& os, const virtualServer& vs);
 };
+
+std::ostream& operator<<(std::ostream& os, const virtualServer& vs);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:38:04 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/22 11:15:27 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/23 14:03:41 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ private:
 	Helpers& operator=(const Helpers&);
 
 public:
-	static std::string trim(const std::string&);
+	static std::string	trim(const std::string&);
+	static size_t		sepDistance(const std::string&, const char&);
 	static bool			findElement(std::vector<std::string> vec, const std::string& elem);
 	static std::vector<std::string>	split(std::string str, const std::string& charset);
 };

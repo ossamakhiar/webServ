@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <map>
 
 std::vector<std::string>	split(std::string str, const std::string& charset)
 {
@@ -19,14 +20,65 @@ std::vector<std::string>	split(std::string str, const std::string& charset)
 	return (tokens);
 }
 
+
+class Test
+{
+	std::string x;
+public:
+	void	setX(const std::string&);
+};
+
+typedef void (Test::*mfunc)(const std::string&);
+
+class Second
+{
+	std::map<std::string, mfunc>	m;
+public:
+	Second()
+	{
+		m.insert(std::pair<std::string, mfunc>("oussama", &Test::setX));
+	}
+	void doWork();
+};
+
+void	Test::setX(const std::string& b)
+{
+	x = b;
+	std::cout << x << std::endl;
+}
+
+void	Second::doWork()
+{
+	Test	t;
+
+	(t.*(m["oussama"]))("khiar");
+}
+
 int	main(void)
 {
-	std::string str = "H";
-    std::string delimiter = ", !?";
-	std::vector<std::string>	tokens;
+	Second	s;
 
-	tokens = split(str, delimiter);
-	for (int i = 0; i < tokens.size(); i++)
-		std::cout << tokens[i] << " " << i << std::endl;
+	s.doWork();
 	return (0);
 }
+
+
+
+
+
+	// std::string str = "H";
+    // std::string delimiter = ", !?";
+	// std::vector<std::string>	tokens;
+
+	// tokens = split(str, delimiter);
+	// for (int i = 0; i < tokens.size(); i++)
+	// 	std::cout << tokens[i] << " " << i << std::endl;
+	// std::vector<int>	v;
+	// int		x;
+
+	// x = 10;
+	// v.push_back(x);
+	// std::string buffer = "oussama khiar {";
+	// size_t pos = buffer.find_first_of(" ");
+	// std::cout << buffer.substr(0, pos);
+	// std::cout << "\n" << pos;
