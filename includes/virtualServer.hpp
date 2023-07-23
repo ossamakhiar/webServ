@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/23 21:18:07 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/23 21:29:36 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,11 @@ public:
 	void	setServerName(const std::string&);
 	void	setEndpoint(const std::string&);
 	void	setErrorPage(const std::string&);
+	void	setMaxBodySize(const std::string&);
 
-	const std::string& getServerName(void) const{
-		return server_name;
-	}
+	// const std::string& getServerName(void) const{
+	// 	return server_name;
+	// }
 
 	// ! remove this
 	friend std::ostream& operator<<(std::ostream& os, const virtualServer& vs);

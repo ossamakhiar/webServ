@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/23 21:07:19 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/23 21:33:40 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ configParser::configParser(const std::string& file_name)
 	// ** Server Directives DB
 	serverDirectives.insert(std::pair<std::string, funcSeter>("listen", &virtualServer::setEndpoint));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("server_name", &virtualServer::setServerName));
+	serverDirectives.insert(std::pair<std::string, funcSeter>("max_client_body_size", &virtualServer::setMaxBodySize));
 	// serverDirectives.insert(std::pair<std::string, funcSeter>("max_client_body_size", 1));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("error_page", &virtualServer::setErrorPage));
 }
@@ -108,7 +109,7 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 	try{
 		buffer = syntaxChecker.syntaxEvaluation(config_file);
 	} catch (std::exception& e) {
-		std::cout << e.what();
+		std::cout << e.what() << std::endl;
 		return (virtualServers);
 	}
 	while (!buffer.empty())
