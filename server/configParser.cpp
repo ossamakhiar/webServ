@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/23 21:33:40 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/23 21:36:52 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,11 +76,9 @@ size_t	configParser::parseDirectives(virtualServer& vs, const std::string& buff,
 virtualServer	configParser::parseServerBlock(std::string& buffer)
 {
 	virtualServer	vs;
-	size_t			i;
-	int				blocks;
+	int				blocks = 1;
+	size_t			i = Helpers::sepDistance(buffer, '{') + 1;
 
-	blocks = 1;
-	i = Helpers::sepDistance(buffer, '{') + 1;
 	while (blocks && buffer[i])
 	{
 		if (buffer[i] == '\n' && ++i)
@@ -104,7 +102,7 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 	std::vector<virtualServer>	virtualServers;
 	configSyntax				syntaxChecker;
 	std::string					buffer;
-	size_t skippedLines;
+	size_t						skippedLines;
 
 	try{
 		buffer = syntaxChecker.syntaxEvaluation(config_file);
