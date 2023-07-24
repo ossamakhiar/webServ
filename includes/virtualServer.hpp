@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/23 21:29:36 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/24 13:59:17 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map> // ** map host with port listening on
+#include <map>
+#include "locationBlock.hpp"
+
 
 class	virtualServer
 {
 private:
 	std::pair<std::string, int>							endpoint;// ** map host with port listening on
-	std::map<std::string, std::vector<std::string> >	locations; // ** map every location with its directives
+	std::map<std::string, locationBlock>				locations; // ** map every location with its directives
 	std::vector<std::pair<std::string, std::string> >	error_pages;
 	std::string											server_name;
 
@@ -38,6 +40,11 @@ public:
 	void	setEndpoint(const std::string&);
 	void	setErrorPage(const std::string&);
 	void	setMaxBodySize(const std::string&);
+
+	locationBlock&	getLocations(const std::string& key)
+	{
+		return (locations[key]);
+	}
 
 	// const std::string& getServerName(void) const{
 	// 	return server_name;

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/23 21:33:07 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/24 14:08:34 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,5 +70,8 @@ std::ostream& operator<<(std::ostream& os, const virtualServer& vs)
 	os << "MaxBodySize: " << vs.max_client_body_size << std::endl;
 	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = vs.error_pages.begin(); it != vs.error_pages.end(); ++it)
 		os << "error_page: " << it->first << " ==> " << it->second << std::endl;
+	std::cout << "Locations: \n";
+	for (std::map<std::string, locationBlock>::const_iterator it = vs.locations.begin(); it != vs.locations.end(); ++it)
+		std::cout << "\t" << it->first << ": \n" << it->second << std::endl;
 	return (os);
 }

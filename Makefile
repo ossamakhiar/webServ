@@ -1,6 +1,6 @@
 NAME = webserv
 SRCS = ./server/main.cpp ./server/configSyntax.cpp ./helpers/helpers.cpp ./server/configParser.cpp \
-		./server/virtualServer.cpp
+		./server/virtualServer.cpp ./server/locationBlock.cpp
 OBJS = $(SRCS:.cpp=.o)
 CPP = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98

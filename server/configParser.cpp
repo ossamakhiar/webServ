@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/23 21:36:52 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/24 14:33:32 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ configParser::configParser(const std::string& file_name)
 	if (!config_file.is_open())
 		throw std::runtime_error("bad input file");
 	// ** Location Directives DB
-	// locationDirectives.insert(std::pair<std::string, int>("allowed_methods", 3));
+	locationDirectives.insert(std::pair<std::string, ldSeter>("root", &locationBlock::setRoot));
+	locationDirectives.insert(std::pair<std::string, ldSeter>("allowed_methods", &locationBlock::setAllowedMethods));
 	// locationDirectives.insert(std::pair<std::string, int>("directory_listing", 1));
-	// locationDirectives.insert(std::pair<std::string, int>("root", 1));
 	// locationDirectives.insert(std::pair<std::string, int>("cgi", 2));
 	// locationDirectives.insert(std::pair<std::string, int>("upload_post", 1));
 
@@ -42,15 +42,42 @@ configParser::~configParser()
 	config_file.close();
 }
 
+std::pair<std::string, std::string>	configParser::locationSettings(const std::string& buff, size_t& i)
+{
+	size_t	end;
+	size_t	pos;
+	std::pair<std::string, std::string>	directive;
+
+	pos = buff.find_first_of(" \t", i);
+	end = buff.find_first_of("\n", pos);
+
+	directive.first = buff.substr(i, pos - i);
+	directive.second = buff.substr(pos, end - pos);
+	i += (directive.first.length() + directive.second.length());
+	// std::cout << directive.first << " *" << directive.second << "*" << i << std::endl;
+	return directive;
+}
+
 size_t	configParser::parseLocationBlock(virtualServer& vs, const std::string& buffer)
 {
-	size_t	i;
+	size_t								pos;
+	std::string							path;
+	std::pair<std::string, std::string>	directive;
+	size_t		i = 0;
 
-	i = 0;
-	// TODO
+	i = Helpers::sepDistance(buffer, ' ') + 1;
+	pos = buffer.find_first_of(" \t\n", i);
+	path = buffer.substr(i, pos - i);
+	std::cout << "*" << path << "*" << std::endl;
+	i += path.length();
 	for ( ; buffer[i] != '}'; i++)
-		;
-	(void)vs;
+	{
+		if (buffer[i] == '\n' || buffer[i] == '{' \
+			|| buffer[i] == 32 || buffer[i] == '\t')
+			continue ;
+		directive = locationSettings(buffer, i);
+		(vs.getLocations(path).*(locationDirectives[directive.first]))(directive.second);
+	}
 	return (i);
 }
 
@@ -79,7 +106,7 @@ virtualServer	configParser::parseServerBlock(std::string& buffer)
 	int				blocks = 1;
 	size_t			i = Helpers::sepDistance(buffer, '{') + 1;
 
-	while (blocks && buffer[i])
+	while (blocks && buffer[i]) // ** buffer'll never end before the blocks close (according to syntax), but you know :)
 	{
 		if (buffer[i] == '\n' && ++i)
 			continue ;
@@ -88,9 +115,9 @@ virtualServer	configParser::parseServerBlock(std::string& buffer)
 			blocks += (1 - 2 * (buffer[i++] == '}'));
 			continue ;
 		}
-		buffer.erase(0, i);
+		buffer.erase(0, i); // ** erase the first part eg. the srever keyword, \n..
 		i = parseDirectives(vs, buffer, blocks);
-		buffer.erase(0, i);
+		buffer.erase(0, i); // ** erase what we parse
 		i = 0;
 	}
 	buffer.erase(0, i);
