@@ -23,10 +23,10 @@
 class	virtualServer
 {
 private:
-	std::pair<std::string, int>							endpoint;// ** map host with port listening on
-	std::map<std::string, locationBlock>				locations; // ** map every location with its directives
-	std::vector<std::pair<std::string, std::string> >	error_pages;
-	std::string											server_name;
+	std::pair<std::string, int>					endpoint;// ** map host with port listening on
+	std::map<std::string, locationBlock>		locations; // ** map every location with its directives
+	std::vector<std::pair<int, std::string> >	error_pages;
+	std::string									server_name;
 
 	int	max_client_body_size;
 

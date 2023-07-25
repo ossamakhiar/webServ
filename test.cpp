@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
+// #include <cstdlib>
+#include <stdexcept>
 
 std::vector<std::string>	split(std::string str, const std::string& charset)
 {
@@ -54,11 +56,34 @@ void	Second::doWork()
 	(t.*(m["oussama"]))("khiar");
 }
 
+int			safeAtoi(const std::string& str)
+{
+	char	*eptr;
+	long	res;
+
+	res = std::strtol(str.c_str(), &eptr, 10);
+	if (*eptr != '\0')
+		throw std::runtime_error("bad argument");
+	std::cout << res << "*" << INT_MAX << std::endl;
+	if (res > INT_MAX || res < INT_MIN)
+		throw std::runtime_error("can't convert");
+	return (res);
+}
+
+
 int	main(void)
 {
-	Second	s;
+	// Second	s;
 
-	s.doWork();
+	// s.doWork();
+	// try {
+	// 	int res = safeAtoi("5885858585856985585858");
+	// 	std::cout << res << std::endl;
+	// } catch (std::exception& e)
+	// {
+	// 	std::cout << e.what() << std::endl;
+	// }
+	std::cout << (1 << 16) << std::endl;
 	return (0);
 }
 

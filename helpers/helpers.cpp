@@ -42,6 +42,19 @@ size_t		Helpers::sepDistance(const std::string& buff, const char& c)
 	return (i);
 }
 
+int			Helpers::safeAtoi(const std::string& str)
+{
+	char	*eptr;
+	long	res;
+
+	res = std::strtol(str.c_str(), &eptr, 10);
+	if (*eptr != '\0')
+		throw std::runtime_error("atoi: bad argument");
+	if (res > INT_MAX || res < INT_MIN)
+		throw std::runtime_error("atoi: can't convert");
+	return (res);
+}
+
 std::vector<std::string>	Helpers::split(std::string str, const std::string& charset)
 {
 	std::vector<std::string>	tokens;

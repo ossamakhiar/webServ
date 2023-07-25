@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/24 14:33:32 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 12:49:16 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,15 +25,14 @@ configParser::configParser(const std::string& file_name)
 	// ** Location Directives DB
 	locationDirectives.insert(std::pair<std::string, ldSeter>("root", &locationBlock::setRoot));
 	locationDirectives.insert(std::pair<std::string, ldSeter>("allowed_methods", &locationBlock::setAllowedMethods));
+	locationDirectives.insert(std::pair<std::string, ldSeter>("cgi", &locationBlock::setCgi));
 	// locationDirectives.insert(std::pair<std::string, int>("directory_listing", 1));
-	// locationDirectives.insert(std::pair<std::string, int>("cgi", 2));
 	// locationDirectives.insert(std::pair<std::string, int>("upload_post", 1));
 
 	// ** Server Directives DB
 	serverDirectives.insert(std::pair<std::string, funcSeter>("listen", &virtualServer::setEndpoint));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("server_name", &virtualServer::setServerName));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("max_client_body_size", &virtualServer::setMaxBodySize));
-	// serverDirectives.insert(std::pair<std::string, funcSeter>("max_client_body_size", 1));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("error_page", &virtualServer::setErrorPage));
 }
 
@@ -53,9 +52,9 @@ std::pair<std::string, std::string>	configParser::locationSettings(const std::st
 
 	directive.first = buff.substr(i, pos - i);
 	directive.second = buff.substr(pos, end - pos);
-	i += (directive.first.length() + directive.second.length());
-	// std::cout << directive.first << " *" << directive.second << "*" << i << std::endl;
-	return directive;
+	i = end;
+	// std::cout << "*" << directive.first << "*" << directive.second << "*" << std::endl;
+	return (directive);
 }
 
 size_t	configParser::parseLocationBlock(virtualServer& vs, const std::string& buffer)
@@ -68,7 +67,7 @@ size_t	configParser::parseLocationBlock(virtualServer& vs, const std::string& bu
 	i = Helpers::sepDistance(buffer, ' ') + 1;
 	pos = buffer.find_first_of(" \t\n", i);
 	path = buffer.substr(i, pos - i);
-	std::cout << "*" << path << "*" << std::endl;
+	// std::cout << "*" << path << "*" << std::endl;
 	i += path.length();
 	for ( ; buffer[i] != '}'; i++)
 	{

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/24 14:08:34 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 11:29:05 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ virtualServer&	virtualServer::operator=(const virtualServer& rhs)
 	server_name = rhs.server_name;
 	error_pages = rhs.error_pages;
 	max_client_body_size = rhs.max_client_body_size;
-	// root = rhs.root;
 	return (*this);
 }
 
@@ -49,18 +48,43 @@ void	virtualServer::setServerName(const std::string& name)
 
 void	virtualServer::setEndpoint(const std::string& listen)
 {
-	endpoint.first = listen;
-	endpoint.second = 80;
+	int							port;
+	std::vector<std::string>	tokens;
+
+	tokens = Helpers::split(listen, ":");
+	if (tokens.size() != 2)
+		throw std::runtime_error("bad listen directive");
+	endpoint.first = tokens[0];
+	port = Helpers::safeAtoi(tokens[1]);
+	if (port < 0 || port > (1 << 16))
+		throw std::runtime_error("bad listen port number");
+	endpoint.second = port;
 }
 
 void	virtualServer::setErrorPage(const std::string& err)
 {
-	error_pages.push_back(std::pair<std::string, std::string>("404", err));
+	std::vector<std::string>	tokens;
+
+	tokens = Helpers::split(err, " \t");
+	error_pages.push_back(std::pair<int, std::string>(Helpers::safeAtoi(tokens[0]), tokens[1])); // ** maybe map container better
 }
+
+/*
+400 Bad Request
+401 Unauthorized
+403 Forbidden
+404 Not Found
+405 Method Not Allowed
+500 Internal Server Error
+502 Bad Gateway
+503 Service Unavailable
+504 Gateway Timeout
+505 HTTP Version Not Supported
+*/
 
 void	virtualServer::setMaxBodySize(const std::string& body_s)
 {
-	max_client_body_size = std::stoi(body_s);
+	max_client_body_size = Helpers::safeAtoi(body_s);
 }
 
 std::ostream& operator<<(std::ostream& os, const virtualServer& vs)
@@ -68,8 +92,8 @@ std::ostream& operator<<(std::ostream& os, const virtualServer& vs)
 	os << "server_name: " << vs.server_name << std::endl;
 	os << "endpoint: " << vs.endpoint.first << "[" << vs.endpoint.second << "]" << std::endl;
 	os << "MaxBodySize: " << vs.max_client_body_size << std::endl;
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = vs.error_pages.begin(); it != vs.error_pages.end(); ++it)
-		os << "error_page: " << it->first << " ==> " << it->second << std::endl;
+	for (std::vector<std::pair<int, std::string> >::const_iterator it = vs.error_pages.begin(); it != vs.error_pages.end(); ++it)
+		os << "error_page: [" << it->first << "] ==> " << it->second << std::endl;
 	std::cout << "Locations: \n";
 	for (std::map<std::string, locationBlock>::const_iterator it = vs.locations.begin(); it != vs.locations.end(); ++it)
 		std::cout << "\t" << it->first << ": \n" << it->second << std::endl;

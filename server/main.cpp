@@ -16,5 +16,10 @@ int	main(void)
 {
 	configParser	parser("./config/test.conf");
 
-	parser.parseConfiguration();
+	try {
+		parser.parseConfiguration();
+	} catch (std::exception& e) {
+		std::cout << e.what() << std::endl;
+	}
+	return (0);
 }

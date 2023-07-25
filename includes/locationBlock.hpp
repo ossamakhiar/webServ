@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 21:54:18 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/24 14:11:49 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 12:48:24 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ public:
 
 	void	setRoot(const std::string&);
 	void	setAllowedMethods(const std::string&);
+	void	setCgi(const std::string&);
+
+	std::map<std::string, std::string> getCGI(void)
+	{
+		return (cgi);
+	}
 
 	friend std::ostream& operator<<(std::ostream& os, const locationBlock& vs);
 };
