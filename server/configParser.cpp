@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 13:10:37 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:42:53 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,11 @@ configParser::configParser(const std::string& file_name)
 	locationDirectives.insert(std::pair<std::string, ldSeter>("root", &locationBlock::setRoot));
 	locationDirectives.insert(std::pair<std::string, ldSeter>("allowed_methods", &locationBlock::setAllowedMethods));
 	locationDirectives.insert(std::pair<std::string, ldSeter>("cgi", &locationBlock::setCgi));
-	// locationDirectives.insert(std::pair<std::string, int>("directory_listing", 1));
+	locationDirectives.insert(std::pair<std::string, ldSeter>("autoindex", &locationBlock::setDirListing));
 	// locationDirectives.insert(std::pair<std::string, int>("upload_post", 1));
 
 	// ** Server Directives DB
+	serverDirectives.insert(std::pair<std::string, funcSeter>("root", &virtualServer::setRootDir));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("listen", &virtualServer::setEndpoint));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("server_name", &virtualServer::setServerName));
 	serverDirectives.insert(std::pair<std::string, funcSeter>("max_client_body_size", &virtualServer::setMaxBodySize));
@@ -53,7 +54,6 @@ std::pair<std::string, std::string>	configParser::locationSettings(const std::st
 	directive.first = buff.substr(i, pos - i);
 	directive.second = buff.substr(pos, end - pos);
 	i = end;
-	// std::cout << "*" << directive.first << "*" << directive.second << "*" << std::endl;
 	return (directive);
 }
 
@@ -67,16 +67,14 @@ size_t	configParser::parseLocationBlock(virtualServer& vs, const std::string& bu
 	i = Helpers::sepDistance(buffer, ' ') + 1;
 	pos = buffer.find_first_of(" \t\n", i);
 	path = buffer.substr(i, pos - i);
-	// std::cout << "*" << path << "*" << std::endl;
 	i += path.length();
 	for ( ; buffer[i] != '}'; i++)
 	{
 		if (buffer[i] == '\n' || buffer[i] == '{' \
-			|| buffer[i] == 32 || buffer[i] == '\t')
+			|| buffer[i] == 32 || buffer[i] == '\t') // ! skip spaces that before {
 			continue ;
 		directive = locationSettings(buffer, i);
 		(vs.getLocations(path).*(locationDirectives[directive.first]))(directive.second);
-		// std::cout << "**" << vs.getLocations(path) << "**" << std::endl;
 	}
 	return (i);
 }
@@ -84,7 +82,6 @@ size_t	configParser::parseLocationBlock(virtualServer& vs, const std::string& bu
 size_t	configParser::parseDirectives(virtualServer& vs, const std::string& buff, int& blocks)
 {
 	size_t		pos;
-	size_t		ret;
 	size_t		lineLength;
 	std::string	directive;
 
@@ -94,8 +91,7 @@ size_t	configParser::parseDirectives(virtualServer& vs, const std::string& buff,
 	if (directive == "location")
 	{
 		blocks++;
-		ret = parseLocationBlock(vs, buff);
-		return (ret);
+		return (parseLocationBlock(vs, buff));
 	}
 	lineLength = Helpers::sepDistance(buff, '\n');
 	(vs.*(serverDirectives[directive]))(buff.substr(pos, lineLength - pos));
@@ -147,8 +143,5 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 		// ** skipped new line that stay in the string to avoid extra call
 		buffer.erase(0, skippedLines);
 	}
-	std::cout << virtualServers.size() << std::endl;
-	for (std::vector<virtualServer>::iterator it = virtualServers.begin(); it != virtualServers.end(); ++it)
-		std::cout << *it << std::endl;
 	return (virtualServers);
 }

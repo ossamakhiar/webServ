@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 22:00:20 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 13:11:57 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:17:23 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 locationBlock::locationBlock()
 {
-
+	autoindex = false;
 }
 
 locationBlock::~locationBlock()
@@ -31,14 +31,13 @@ locationBlock&	locationBlock::operator=(const locationBlock& rhs)
 {
 	if (this == &rhs)
 		return (*this);
-	directory_listing = rhs.directory_listing;
+	autoindex = rhs.autoindex;
 	allowed_methods = rhs.allowed_methods;
 	index = rhs.index;
 	root = rhs.root;
 	cgi = rhs.cgi;
 	return (*this);
 }
-
 
 void	locationBlock::setRoot(const std::string& r)
 {
@@ -63,14 +62,24 @@ void	locationBlock::setCgi(const std::string& inpt)
 	std::vector<std::string>	tokens;
 
 	tokens = Helpers::split(inpt, " \t");
-	// this->cgi[tokens[0]] = tokens[1];
 	cgi.insert(std::pair<std::string, std::string>(tokens[0], tokens[1]));
 }
 
+void	locationBlock::setDirListing(const std::string& inpt)
+{
+	
+	if (Helpers::trim(inpt) == "off" || Helpers::trim(inpt) == "OFF")
+		autoindex = false;
+	else if (Helpers::trim(inpt) == "on" || Helpers::trim(inpt) == "ON")
+		autoindex = true;
+	else
+		throw std::runtime_error("error: bad directory listing argument");
+}
 
 std::ostream& operator<<(std::ostream& os, const locationBlock& vs)
 {
 	os << "\t\troot: 		*" << vs.root;
+	os << "\n\t\tautoindex: " << (vs.autoindex ? "ON" : "OFF");
 	os << "\n\t\tallowed_methods: ";
 	for (std::vector<std::string>::const_iterator it = vs.allowed_methods.begin(); it != vs.allowed_methods.end(); ++it)
 		os << *it << " ";

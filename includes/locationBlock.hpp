@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 21:54:18 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 12:48:24 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:17:23 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 class locationBlock
 {
 private:
-	bool								directory_listing;
+	bool								autoindex;
 	std::string							root;
 	std::vector<std::string>			allowed_methods;
 	std::vector<std::string>			index;
@@ -37,6 +37,7 @@ public:
 	void	setRoot(const std::string&);
 	void	setAllowedMethods(const std::string&);
 	void	setCgi(const std::string&);
+	void	setDirListing(const std::string&);
 
 	std::map<std::string, std::string> getCGI(void)
 	{

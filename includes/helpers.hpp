@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:38:04 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 11:50:03 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:32:23 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 class Helpers
 {
@@ -42,6 +43,26 @@ public:
 		}
 		return (false);
 	}
+
+
+	class exceptionError : public std::exception
+	{
+		private:
+			std::string	msg;
+
+		public:
+			exceptionError() : msg("error!") {
+				
+			}
+			exceptionError(const std::string& m) : msg(m) {
+				
+			}
+			const char* what() const throw()
+			{
+				return (msg.c_str());
+			}
+			virtual ~exceptionError() throw() {};
+	};
 };
 
 #endif

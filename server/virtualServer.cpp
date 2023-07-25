@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 13:11:08 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:24:19 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ virtualServer&	virtualServer::operator=(const virtualServer& rhs)
 {
 	if (this == &rhs)
 		return (*this);
+	root = rhs.root;
 	endpoint = rhs.endpoint;
 	locations = rhs.locations;
 	server_name = rhs.server_name;
@@ -39,11 +40,15 @@ virtualServer&	virtualServer::operator=(const virtualServer& rhs)
 	return (*this);
 }
 
-// ? .......
-
+// TODO :: seters
 void	virtualServer::setServerName(const std::string& name)
 {
 	this->server_name = name;
+}
+
+void	virtualServer::setRootDir(const std::string& r)
+{
+	this->root = Helpers::trim(r);
 }
 
 void	virtualServer::setEndpoint(const std::string& listen)
@@ -69,19 +74,6 @@ void	virtualServer::setErrorPage(const std::string& err)
 	error_pages.push_back(std::pair<int, std::string>(Helpers::safeAtoi(tokens[0]), tokens[1])); // ** maybe map container better
 }
 
-/*
-400 Bad Request
-401 Unauthorized
-403 Forbidden
-404 Not Found
-405 Method Not Allowed
-500 Internal Server Error
-502 Bad Gateway
-503 Service Unavailable
-504 Gateway Timeout
-505 HTTP Version Not Supported
-*/
-
 void	virtualServer::setMaxBodySize(const std::string& body_s)
 {
 	max_client_body_size = Helpers::safeAtoi(body_s);
@@ -89,6 +81,7 @@ void	virtualServer::setMaxBodySize(const std::string& body_s)
 
 std::ostream& operator<<(std::ostream& os, const virtualServer& vs)
 {
+	os << "root: " << vs.root << std::endl;
 	os << "server_name: " << vs.server_name << std::endl;
 	os << "endpoint: " << vs.endpoint.first << "[" << vs.endpoint.second << "]" << std::endl;
 	os << "MaxBodySize: " << vs.max_client_body_size << std::endl;

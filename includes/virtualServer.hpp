@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/24 13:59:17 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:20:36 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ private:
 	std::map<std::string, locationBlock>		locations; // ** map every location with its directives
 	std::vector<std::pair<int, std::string> >	error_pages;
 	std::string									server_name;
+	std::string									root;
 
 	int	max_client_body_size;
 
@@ -40,6 +41,7 @@ public:
 	void	setEndpoint(const std::string&);
 	void	setErrorPage(const std::string&);
 	void	setMaxBodySize(const std::string&);
+	void	setRootDir(const std::string&);
 
 	locationBlock&	getLocations(const std::string& key)
 	{

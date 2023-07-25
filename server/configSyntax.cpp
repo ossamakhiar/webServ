@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/22 22:22:24 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:33:03 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,14 @@ configSyntax::configSyntax()
 {
 	// ** Location Directives DB
 	locationDirectives.insert(std::pair<std::string, int>("allowed_methods", 3));
-	locationDirectives.insert(std::pair<std::string, int>("directory_listing", 1));
+	locationDirectives.insert(std::pair<std::string, int>("autoindex", 1));
 	locationDirectives.insert(std::pair<std::string, int>("root", 1));
 	locationDirectives.insert(std::pair<std::string, int>("cgi", 2));
 	locationDirectives.insert(std::pair<std::string, int>("upload_post", 1));
 
 	// ** Server Directives DB
 	serverDirectives.insert(std::pair<std::string, int>("listen", 1));
+	serverDirectives.insert(std::pair<std::string, int>("root", 1));
 	serverDirectives.insert(std::pair<std::string, int>("server_name", 2));
 	serverDirectives.insert(std::pair<std::string, int>("max_client_body_size", 1));
 	serverDirectives.insert(std::pair<std::string, int>("error_page", 2));
@@ -69,7 +70,7 @@ void	configSyntax::locationBlock(const std::vector<std::string>& tokens, size_t 
 	if ((blocks != 1 && tokens[i] == "location") || (!locationLine(tokens) && blocks != 2))
 		throw std::runtime_error("syntax error: bad location block");
 	if (blocks == 2 && !checkDirectives(tokens, i))
-		throw std::runtime_error("syntax error: bad location directive");
+		throw Helpers::exceptionError("syntax error: bad location directive");
 }
 
 bool	configSyntax::checkServerDircs(const std::vector<std::string>& tokens, size_t i)

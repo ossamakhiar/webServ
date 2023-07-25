@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:32:02 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/22 21:16:40 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 15:43:33 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ private:
 	bool	locationLine(const std::vector<std::string>&);
 	void	locationBlock(const std::vector<std::string>&, size_t, int);
 	void	checkBlock(const std::string& line, int& blocks);
+
 public:
 	configSyntax();
 	~configSyntax();
