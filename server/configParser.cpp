@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 12:49:16 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 13:10:37 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,7 @@ size_t	configParser::parseLocationBlock(virtualServer& vs, const std::string& bu
 			continue ;
 		directive = locationSettings(buffer, i);
 		(vs.getLocations(path).*(locationDirectives[directive.first]))(directive.second);
+		// std::cout << "**" << vs.getLocations(path) << "**" << std::endl;
 	}
 	return (i);
 }
@@ -83,6 +84,7 @@ size_t	configParser::parseLocationBlock(virtualServer& vs, const std::string& bu
 size_t	configParser::parseDirectives(virtualServer& vs, const std::string& buff, int& blocks)
 {
 	size_t		pos;
+	size_t		ret;
 	size_t		lineLength;
 	std::string	directive;
 
@@ -92,7 +94,8 @@ size_t	configParser::parseDirectives(virtualServer& vs, const std::string& buff,
 	if (directive == "location")
 	{
 		blocks++;
-		return (parseLocationBlock(vs, buff));
+		ret = parseLocationBlock(vs, buff);
+		return (ret);
 	}
 	lineLength = Helpers::sepDistance(buff, '\n');
 	(vs.*(serverDirectives[directive]))(buff.substr(pos, lineLength - pos));
@@ -119,6 +122,7 @@ virtualServer	configParser::parseServerBlock(std::string& buffer)
 		buffer.erase(0, i); // ** erase what we parse
 		i = 0;
 	}
+		// std::cout << "**" << vs.getLocations("/") << "**" << std::endl;
 	buffer.erase(0, i);
 	return (vs);
 }

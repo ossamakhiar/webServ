@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 22:00:20 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 12:44:57 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 13:11:57 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ locationBlock&	locationBlock::operator=(const locationBlock& rhs)
 	allowed_methods = rhs.allowed_methods;
 	index = rhs.index;
 	root = rhs.root;
+	cgi = rhs.cgi;
 	return (*this);
 }
 
@@ -62,9 +63,8 @@ void	locationBlock::setCgi(const std::string& inpt)
 	std::vector<std::string>	tokens;
 
 	tokens = Helpers::split(inpt, " \t");
+	// this->cgi[tokens[0]] = tokens[1];
 	cgi.insert(std::pair<std::string, std::string>(tokens[0], tokens[1]));
-	for (std::map<std::string, std::string>::const_iterator it = cgi.begin(); it != cgi.end(); ++it)
-		std::cout << it->first << ": " << it->second << std::endl;
 }
 
 
