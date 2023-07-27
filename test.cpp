@@ -83,7 +83,9 @@ int	main(void)
 	// {
 	// 	std::cout << e.what() << std::endl;
 	// }
-	std::cout << (1 << 16) << std::endl;
+	// std::cout << (1 << 16) << std::endl;
+	unsigned short x = -1;
+	std::cout << x << " " << (1 << 16) - 1 << std::endl;
 	return (0);
 }
 

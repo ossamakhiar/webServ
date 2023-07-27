@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 15:24:19 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 16:03:32 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void	virtualServer::setEndpoint(const std::string& listen)
 		throw std::runtime_error("bad listen directive");
 	endpoint.first = tokens[0];
 	port = Helpers::safeAtoi(tokens[1]);
-	if (port < 0 || port > (1 << 16))
+	if (port < 0 || port > (1 << 16) - 1)
 		throw std::runtime_error("bad listen port number");
 	endpoint.second = port;
 }

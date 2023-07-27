@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 15:33:03 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/27 22:22:58 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,12 +86,20 @@ bool	configSyntax::checkServerDircs(const std::vector<std::string>& tokens, size
 	return (true);
 }
 
+// bool	configSyntax::checkServerLine(const std::vector<std::string>& tokens, size_t i)
+// {
+// 	return (tokens.size() == 1 || tokens[i + 1] == "{");
+// }
+
 void	configSyntax::serverBlock(const std::vector<std::string>& tokens, size_t i, int& blocks)
 {
 	static int block_type;
 
+	if (tokens[i] != "server" && blocks == 0)
+		throw std::runtime_error("wait wait");
+	// if (tokens[i] == "server" && (blocks != 0 || !checkServerLine(tokens, i))) // ! check for server {\n...}
 	if (tokens[i] == "server" && blocks != 0) // ! check for server {\n...}
-		throw std::runtime_error("syntax error: bad server block level");
+		throw std::runtime_error("syntax error: bad server block");
 	if (tokens[i] == "{" && block_type == LOCATION_BLOCK)
 		blocks++;
 	else if (tokens[i] == "}" && block_type == LOCATION_BLOCK)

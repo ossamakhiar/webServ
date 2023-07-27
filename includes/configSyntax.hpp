@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:32:02 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 15:43:33 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/27 22:12:24 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ private:
 
 	// TODO :: private methods
 	bool	isComment(const std::string&);
+	bool	checkServerLine(const std::vector<std::string>& tokens, size_t i);
 	bool	checkServerDircs(const std::vector<std::string>& tokens, size_t i);
 	void	serverBlock(const std::vector<std::string>&, size_t, int&);
 	bool	checkDirectives(const std::vector<std::string>& tokens, size_t i); // ** location directives

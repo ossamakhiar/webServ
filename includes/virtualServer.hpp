@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 15:20:36 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/25 16:06:22 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,6 @@ public:
 	{
 		return (locations[key]);
 	}
-
-	// const std::string& getServerName(void) const{
-	// 	return server_name;
-	// }
 
 	// ! remove this
 	friend std::ostream& operator<<(std::ostream& os, const virtualServer& vs);
