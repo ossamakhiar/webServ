@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 15:42:53 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/28 13:00:05 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 	std::vector<virtualServer>	virtualServers;
 	configSyntax				syntaxChecker;
 	std::string					buffer;
-	size_t						skippedLines;
+	// size_t						skippedLines;
 
 	try{
 		buffer = syntaxChecker.syntaxEvaluation(config_file);
@@ -136,12 +136,13 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 		std::cout << e.what() << std::endl;
 		return (virtualServers);
 	}
-	while (!buffer.empty())
-	{
-		virtualServers.push_back(parseServerBlock(buffer));
-		skippedLines = buffer.find_first_not_of("\n");
-		// ** skipped new line that stay in the string to avoid extra call
-		buffer.erase(0, skippedLines);
-	}
+	std::cout << buffer;
+	// while (!buffer.empty())
+	// {
+	// 	virtualServers.push_back(parseServerBlock(buffer));
+	// 	skippedLines = buffer.find_first_not_of("\n");
+	// 	// ** skipped new line that stay in the string to avoid extra call
+	// 	buffer.erase(0, skippedLines);
+	// }
 	return (virtualServers);
 }

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/27 22:22:58 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/28 13:58:12 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,83 +55,124 @@ bool	configSyntax::directiveOperations(std::map<std::string, int>::iterator it, 
 	return (true);
 }
 
-bool	configSyntax::checkDirectives(const std::vector<std::string>& tokens, size_t i)
+bool	configSyntax::checkDirectives(const std::string& directive, size_t size)
 {
 	std::map<std::string, int>::iterator itlow;
 
-	if (i != 0)
-		return (true);
-	itlow = locationDirectives.lower_bound(tokens[i]);
-	return (directiveOperations(itlow, tokens[i], tokens.size()));
+	itlow = locationDirectives.lower_bound(directive);
+	return (directiveOperations(itlow, directive, size));
 }
 
-void	configSyntax::locationBlock(const std::vector<std::string>& tokens, size_t i, int blocks)
-{
-	if ((blocks != 1 && tokens[i] == "location") || (!locationLine(tokens) && blocks != 2))
-		throw std::runtime_error("syntax error: bad location block");
-	if (blocks == 2 && !checkDirectives(tokens, i))
-		throw Helpers::exceptionError("syntax error: bad location directive");
-}
-
-bool	configSyntax::checkServerDircs(const std::vector<std::string>& tokens, size_t i)
+bool	configSyntax::checkServerDircs(const std::string& directive, size_t size)
 {
 	std::map<std::string, int>::iterator	itlow;
 
-	if (i != 0)
-		return (true);
-	itlow = serverDirectives.lower_bound(tokens[i]);
-	if (itlow->first != tokens[i] || \
-		tokens.size() != static_cast<size_t>(itlow->second) + 1)
+	itlow = serverDirectives.lower_bound(directive);
+	if (itlow->first != directive || \
+		size != static_cast<size_t>(itlow->second) + 1)
 		return (false);
 	return (true);
 }
 
-// bool	configSyntax::checkServerLine(const std::vector<std::string>& tokens, size_t i)
-// {
-// 	return (tokens.size() == 1 || tokens[i + 1] == "{");
-// }
-
-void	configSyntax::serverBlock(const std::vector<std::string>& tokens, size_t i, int& blocks)
+size_t	configSyntax::checkLocationStart(const std::string& buff, size_t start)
 {
-	static int block_type;
+	size_t	i;
+	int		state;
 
-	if (tokens[i] != "server" && blocks == 0)
-		throw std::runtime_error("wait wait");
-	// if (tokens[i] == "server" && (blocks != 0 || !checkServerLine(tokens, i))) // ! check for server {\n...}
-	if (tokens[i] == "server" && blocks != 0) // ! check for server {\n...}
-		throw std::runtime_error("syntax error: bad server block");
-	if (tokens[i] == "{" && block_type == LOCATION_BLOCK)
-		blocks++;
-	else if (tokens[i] == "}" && block_type == LOCATION_BLOCK)
-		(block_type = 0x0, blocks--);
-	else if ((tokens[i] == "location" && (block_type = LOCATION_BLOCK)) || block_type == LOCATION_BLOCK)
-		locationBlock(tokens, i, blocks);
-	else if (blocks == 1 && !checkServerDircs(tokens, i))
-		throw std::runtime_error("syntax error: bad server directive");
+	state = 0;
+	for (i = start; buff[i] != '{'; i++)
+	{
+		if (buff[i] == 32 || buff[i] == '\t' || buff[i] == '\n')
+		{
+			if (state == 1)
+				state = 2;
+			continue ;
+		}
+		if (state == 2)
+			throw std::runtime_error("syntax error: bad location start block");
+		state = 1;
+	}
+	if (!state || buff[i + 1] != '\n')
+		throw std::runtime_error("syntax error: bad location start block");
+	return (++i);
 }
 
-void	configSyntax::checkBlock(const std::string& line, int& blocks)
+void	configSyntax::locationBlock(std::string& buff, size_t& i)
 {
+	int							block = 1;
+	size_t						pos;
+	std::string					directive_line;	
 	std::vector<std::string>	tokens;
-	static int					block_type;
 
-	tokens = Helpers::split(line, " \t");
-	for (size_t i = 0; i < tokens.size(); i++)
+	i += 8;// * skip length of location
+	i = checkLocationStart(buff, i);
+	while (block)
 	{
-		if (tokens[i] == "{" && blocks == 0)
-			blocks++;
-		else if (tokens[i] == "}" && blocks == 1)
-			(block_type = 0x0, blocks--);
-		else if ((tokens[i] == "server" && (block_type = SERVER_BLOCK)) || block_type == SERVER_BLOCK)
-			serverBlock(tokens, i, blocks);
-		else
-			throw std::runtime_error("syntax error");
+		((buff[i] == '\n') && i++);
+		pos = buff.find_first_of("\n", i);
+		directive_line = buff.substr(i, pos - i);
+		tokens = Helpers::split(directive_line, " \t");
+		if (tokens[0] == "}")
+		{
+			(block = 0, i++);
+			continue ;
+		}
+		if (!checkDirectives(tokens[0], tokens.size()))
+			throw std::runtime_error("bad location directive");
+		i += directive_line.length();
 	}
+}
+
+size_t	configSyntax::serverBlockStart(const std::string& buff, size_t start)
+{
+	size_t	i;
+
+	for (i = start; buff[i] != '{'; i++)
+	{
+		if (buff[i] == 32 || buff[i] == '\t' || buff[i] == '\n')
+			continue ;
+		break ;
+	}
+	if (buff[i] != '{' || buff[i + 1] != '\n')
+		throw std::runtime_error("bad server block start");
+	return (i + 2); // ! skip { and \n
+}
+
+void	configSyntax::checkBlock(std::string& buff, size_t& i)
+{
+	int							block  = 1;
+	std::string					directive_line;
+	size_t						pos = buff.find_first_of(" \t\n", i);
+	std::vector<std::string>	tokens;
+
+	if (buff.substr(i, pos - i) != "server")
+		throw std::runtime_error("server block error");
+	i += 6; // * skip length of "server"
+	i = serverBlockStart(buff, i);
+	while (block)
+	{
+		if (buff[i] == '\n')
+			i++;
+		pos = buff.find_first_of("\n", i);
+		directive_line = buff.substr(i, pos - i);
+		tokens = Helpers::split(directive_line, " \t");
+		if (tokens[0] == "}")
+			(block = 0, i++);
+		else if (tokens[0] == "location")
+			locationBlock(buff, i);
+		else
+		{
+			if (!checkServerDircs(tokens[0], tokens.size()))
+				throw std::runtime_error("bad server directive");
+			i += directive_line.length();
+		}
+	}
+	// if (buff[i] == '\n')
+	// 	i++;
 }
 
 std::string	configSyntax::syntaxEvaluation(std::ifstream& config_file)
 {
-	int			blocks = 0;
 	std::string	current_line;
 	std::string	buffer;
 
@@ -141,11 +182,14 @@ std::string	configSyntax::syntaxEvaluation(std::ifstream& config_file)
 		current_line = Helpers::trim(current_line);
 		if (isComment(current_line))
 			continue ;
-		checkBlock(current_line, blocks);
 		buffer += current_line;
 		buffer += "\n";
 	}
-	if (blocks)
-		throw std::runtime_error("syntax error");
+	for (size_t i = 0; i < buffer.length();)
+	{
+		checkBlock(buffer, i);
+		if (buffer[i] == '\n')
+			i++;
+	}
 	return (buffer);
 }
