@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/31 18:48:59 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/31 18:55:32 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,38 +163,16 @@ void	serverManager::readClientRequest(int fd)
 
 void	serverManager::handleSocketEvents(int fd)
 {
-	struct sockaddr_in	addr;
-	socklen_t 			len = sizeof(struct sockaddr_in);
-	int					newsock, bytes;
-	char				buffer[1024] = {0};
+	bool	is_passive;
 
+	is_passive = isPassiveSocket(fd);
 	// TODO :: check if fd exists on passive socket, then create an active socket
-	if (isPassiveSocket(fd))
+	if (is_passive)
 	{
 		acceptNewConnection(fd);
 		return ;
 	}
-	
-	// try {
-	// 	_vs_endpoint.at(fd); // TODO :: if fd exists on passive socket, then create an active socket
-	// 	newsock = accept(fd, (struct sockaddr*)&addr, &len);
-	// 	FD_SET(newsock, &read_fds);
-	// 	nfds = (newsock > nfds ? newsock : nfds);
-	// 	std::cout << "\e[1;32mnew connection from: " << inet_ntoa(addr.sin_addr) << "::" << ntohs(addr.sin_port) << "\e[0m\n";
-	// 	newClient(newsock, addr);
-	// } catch (std::exception& e) {
-	// 	bytes = read(fd, buffer, 1024);
-	// 	if (bytes == 0)
-	// 	{
-	// 		dropClient(fd);// ** BYE BYE
-	// 		close(fd);
-	// 		FD_CLR(fd, &read_fds);
-	// 		return ;
-	// 	}
-	// 	std::cout << buffer << std::endl;
-	// 	FD_SET(fd, &write_fds);
-	// 	FD_CLR(fd, &read_fds);
-	// }
+	readClientRequest(fd);
 }
 
 void	serverManager::serveClients(int fd)
@@ -203,6 +181,7 @@ void	serverManager::serveClients(int fd)
 	write(fd, "Server: oussama khiar\n\n", 23);
 	write(fd, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);
 	std::cout << "+++++++ request sent ++++++++\n";
+	// TODO :: check if it's a presistent connection & handle it
 	dropClient(fd);
 	close(fd);
 	FD_CLR(fd, &write_fds);
