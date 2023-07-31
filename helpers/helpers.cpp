@@ -72,3 +72,11 @@ std::vector<std::string>	Helpers::split(std::string str, const std::string& char
 		tokens.push_back(str);
 	return (tokens);
 }
+
+void	Helpers::retCheck(int ret, const std::string& msg)
+{
+	if (ret >= 0)
+		return ;
+	std::cout << "here...\n";
+	throw Helpers::exceptionError(msg);
+}

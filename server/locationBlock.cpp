@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 22:00:20 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 15:17:23 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/28 14:44:23 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void	locationBlock::setCgi(const std::string& inpt)
 
 void	locationBlock::setDirListing(const std::string& inpt)
 {
-	
 	if (Helpers::trim(inpt) == "off" || Helpers::trim(inpt) == "OFF")
 		autoindex = false;
 	else if (Helpers::trim(inpt) == "on" || Helpers::trim(inpt) == "ON")

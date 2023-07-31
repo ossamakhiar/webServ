@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/28 13:00:05 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/30 19:09:59 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ virtualServer	configParser::parseServerBlock(std::string& buffer)
 		buffer.erase(0, i); // ** erase what we parse
 		i = 0;
 	}
-		// std::cout << "**" << vs.getLocations("/") << "**" << std::endl;
+	// std::cout << "**" << vs.getLocations("/") << "**" << std::endl;
 	buffer.erase(0, i);
 	return (vs);
 }
@@ -128,7 +128,7 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 	std::vector<virtualServer>	virtualServers;
 	configSyntax				syntaxChecker;
 	std::string					buffer;
-	// size_t						skippedLines;
+	size_t						skippedLines;
 
 	try{
 		buffer = syntaxChecker.syntaxEvaluation(config_file);
@@ -136,13 +136,12 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 		std::cout << e.what() << std::endl;
 		return (virtualServers);
 	}
-	std::cout << buffer;
-	// while (!buffer.empty())
-	// {
-	// 	virtualServers.push_back(parseServerBlock(buffer));
-	// 	skippedLines = buffer.find_first_not_of("\n");
-	// 	// ** skipped new line that stay in the string to avoid extra call
-	// 	buffer.erase(0, skippedLines);
-	// }
+	while (!buffer.empty())
+	{
+		virtualServers.push_back(parseServerBlock(buffer));
+		skippedLines = buffer.find_first_not_of("\n");
+		// ** skipped new line that stay in the string to avoid extra call
+		buffer.erase(0, skippedLines);
+	}
 	return (virtualServers);
 }

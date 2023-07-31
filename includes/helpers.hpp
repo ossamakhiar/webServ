@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:38:04 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 15:32:23 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/30 15:56:38 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ private:
 	Helpers& operator=(const Helpers&);
 
 public:
+	static void				retCheck(int ret, const std::string& msg);
 	static std::string	trim(const std::string&);
 	static size_t		sepDistance(const std::string&, const char&);
 	static bool			findElement(std::vector<std::string> vec, const std::string& elem);

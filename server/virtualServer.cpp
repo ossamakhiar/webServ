@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 16:03:32 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/30 20:25:48 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ virtualServer&	virtualServer::operator=(const virtualServer& rhs)
 {
 	if (this == &rhs)
 		return (*this);
+	port = rhs.port;
 	root = rhs.root;
 	endpoint = rhs.endpoint;
 	locations = rhs.locations;
@@ -40,7 +41,23 @@ virtualServer&	virtualServer::operator=(const virtualServer& rhs)
 	return (*this);
 }
 
-// TODO :: seters
+// TODO :: Getters
+locationBlock&	virtualServer::getLocations(const std::string& key)
+{
+	return (locations[key]);
+}
+
+const std::string&	virtualServer::getPort() const
+{
+	return (port);
+}
+
+const std::pair<std::string, int>& virtualServer::getEndpoint() const
+{
+	return (endpoint);
+}
+
+// TODO :: setters
 void	virtualServer::setServerName(const std::string& name)
 {
 	this->server_name = name;
@@ -53,16 +70,24 @@ void	virtualServer::setRootDir(const std::string& r)
 
 void	virtualServer::setEndpoint(const std::string& listen)
 {
-	int							port;
+	int							port, ret;
+	struct addrinfo				hints, *res;
 	std::vector<std::string>	tokens;
 
-	tokens = Helpers::split(listen, ":");
+	tokens = Helpers::split(Helpers::trim(listen), ":");
 	if (tokens.size() != 2)
 		throw std::runtime_error("bad listen directive");
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	ret = getaddrinfo(tokens[0].c_str(), tokens[1].c_str(), &hints, &res); // ! that a create a unix domain socket "why ?""
+	if (ret)
+		throw Helpers::exceptionError("bad endpoint input");
+	freeaddrinfo(res);
+	this->port = tokens[1];
 	endpoint.first = tokens[0];
 	port = Helpers::safeAtoi(tokens[1]);
-	if (port < 0 || port > (1 << 16) - 1)
-		throw std::runtime_error("bad listen port number");
 	endpoint.second = port;
 }
 

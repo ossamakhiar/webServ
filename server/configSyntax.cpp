@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/28 13:58:12 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/28 14:01:48 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ void	configSyntax::locationBlock(std::string& buff, size_t& i)
 			continue ;
 		}
 		if (!checkDirectives(tokens[0], tokens.size()))
-			throw std::runtime_error("bad location directive");
+			throw std::runtime_error("syntax error: bad location directive");
 		i += directive_line.length();
 	}
 }
@@ -134,7 +134,7 @@ size_t	configSyntax::serverBlockStart(const std::string& buff, size_t start)
 		break ;
 	}
 	if (buff[i] != '{' || buff[i + 1] != '\n')
-		throw std::runtime_error("bad server block start");
+		throw std::runtime_error("syntax error: bad server block start");
 	return (i + 2); // ! skip { and \n
 }
 
@@ -146,7 +146,7 @@ void	configSyntax::checkBlock(std::string& buff, size_t& i)
 	std::vector<std::string>	tokens;
 
 	if (buff.substr(i, pos - i) != "server")
-		throw std::runtime_error("server block error");
+		throw std::runtime_error("syntax error: server block error");
 	i += 6; // * skip length of "server"
 	i = serverBlockStart(buff, i);
 	while (block)
@@ -163,12 +163,10 @@ void	configSyntax::checkBlock(std::string& buff, size_t& i)
 		else
 		{
 			if (!checkServerDircs(tokens[0], tokens.size()))
-				throw std::runtime_error("bad server directive");
+				throw std::runtime_error("syntax error: bad server directive");
 			i += directive_line.length();
 		}
 	}
-	// if (buff[i] == '\n')
-	// 	i++;
 }
 
 std::string	configSyntax::syntaxEvaluation(std::ifstream& config_file)

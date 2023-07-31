@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/25 16:06:22 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/30 20:25:25 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <netdb.h>
 #include "locationBlock.hpp"
 
 
@@ -28,6 +29,7 @@ private:
 	std::vector<std::pair<int, std::string> >	error_pages;
 	std::string									server_name;
 	std::string									root;
+	std::string									port; // ** Store the port in string to use it in getaddrinfo
 
 	int	max_client_body_size;
 
@@ -43,10 +45,10 @@ public:
 	void	setMaxBodySize(const std::string&);
 	void	setRootDir(const std::string&);
 
-	locationBlock&	getLocations(const std::string& key)
-	{
-		return (locations[key]);
-	}
+	// TODO :: Getters
+	locationBlock&		getLocations(const std::string& key);
+	const std::string&	getPort() const;
+	const std::pair<std::string, int>& getEndpoint() const;
 
 	// ! remove this
 	friend std::ostream& operator<<(std::ostream& os, const virtualServer& vs);
