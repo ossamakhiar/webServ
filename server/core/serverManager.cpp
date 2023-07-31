@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/30 22:32:17 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/31 18:48:59 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ serverManager::serverManager() : nfds(0)
 	_virtual_servers = parser.parseConfiguration();
 	FD_ZERO(&read_fds);
 	FD_ZERO(&write_fds);
-	FD_ZERO(&pre_read_fds);
-	FD_ZERO(&pre_write_fds);
+	// FD_ZERO(&pre_read_fds);
+	// FD_ZERO(&pre_write_fds);
 	createPassiveSockets();
 	for (std::map<int, std::vector<virtualServer*> >::iterator it = _vs_endpoint.begin(); it != _vs_endpoint.end(); ++it)
 	{
@@ -34,7 +34,7 @@ serverManager::serverManager() : nfds(0)
 	}
 	for (std::map<int, std::vector<virtualServer*> >::iterator it = _vs_endpoint.begin(); it != _vs_endpoint.end(); ++it)
 		FD_SET(it->first, &read_fds);
-	// nfds = _vs_endpoint.size();
+
 }
 
 serverManager::~serverManager()
@@ -69,7 +69,7 @@ int	serverManager::createSocket(const char *hostname, const char *port)
 	getaddrinfo(hostname, port, &hints, &res);
 	if ((socket_fd = socket(res->ai_family, res->ai_socktype, 0)) < 0)
 		throw Helpers::exceptionError("socket creation failed!");
-	nfds = socket_fd;
+	nfds = socket_fd; // ** The Highest fd for select syscall
 	// std::cout << "fd: " << socket_fd << std::endl;
 	setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 	if (bind(socket_fd, res->ai_addr, res->ai_addrlen) < 0)
@@ -80,7 +80,7 @@ int	serverManager::createSocket(const char *hostname, const char *port)
 	return (socket_fd);
 }
 
-// ** Create the Passive Socket that listen for incoming connections
+// TODO :: Create the Passive Sockets that listen for incoming connections
 void	serverManager::createPassiveSockets(void)
 {
 	std::map<std::string, int>				pre_listen;
@@ -101,13 +101,116 @@ void	serverManager::createPassiveSockets(void)
 	}
 }
 
+void	serverManager::newClient(int fd, struct sockaddr_in addr)
+{
+	Client *client;
+
+	client = new Client(fd, addr);
+	_clients[fd] = client;
+}
+
+void	serverManager::dropClient(int fd)
+{
+	Client	*c;
+
+	c = _clients[fd];
+	_clients.erase(fd);
+	delete c;
+}
+
+bool	serverManager::isPassiveSocket(int fd)
+{
+	return (_vs_endpoint.count(fd) > 0);
+}
+
+void	serverManager::acceptNewConnection(int fd)
+{
+	int					newsock;
+	struct sockaddr_in	addr;
+	socklen_t 			len = sizeof(struct sockaddr_in);
+
+	newsock = accept(fd, (struct sockaddr*)&addr, &len);
+	if (newsock >= 1024) // * the highest fd number
+	{
+		// ! temporary printing
+		std::cout << "\e[1;31mconnection refused\e[0m -- the sockets set full" << std::endl;
+		close(newsock);
+		return ;
+	}
+	FD_SET(newsock, &read_fds);
+	nfds = (newsock > nfds ? newsock : nfds);
+	std::cout << "\e[1;32mnew connection from: " << inet_ntoa(addr.sin_addr) << "::" << ntohs(addr.sin_port) << "\e[0m\n";
+	newClient(newsock, addr);
+}
+
+void	serverManager::readClientRequest(int fd)
+{
+	int		bytes;
+	char	buffer[1024] = {0};
+
+	bytes = read(fd, buffer, 1024);
+	if (bytes == 0)
+	{
+		dropClient(fd);// ** BYE BYE
+		close(fd);
+		FD_CLR(fd, &read_fds);
+		return ;
+	}
+	std::cout << buffer << std::endl;
+	FD_SET(fd, &write_fds);
+	FD_CLR(fd, &read_fds);
+}
+
+void	serverManager::handleSocketEvents(int fd)
+{
+	struct sockaddr_in	addr;
+	socklen_t 			len = sizeof(struct sockaddr_in);
+	int					newsock, bytes;
+	char				buffer[1024] = {0};
+
+	// TODO :: check if fd exists on passive socket, then create an active socket
+	if (isPassiveSocket(fd))
+	{
+		acceptNewConnection(fd);
+		return ;
+	}
+	
+	// try {
+	// 	_vs_endpoint.at(fd); // TODO :: if fd exists on passive socket, then create an active socket
+	// 	newsock = accept(fd, (struct sockaddr*)&addr, &len);
+	// 	FD_SET(newsock, &read_fds);
+	// 	nfds = (newsock > nfds ? newsock : nfds);
+	// 	std::cout << "\e[1;32mnew connection from: " << inet_ntoa(addr.sin_addr) << "::" << ntohs(addr.sin_port) << "\e[0m\n";
+	// 	newClient(newsock, addr);
+	// } catch (std::exception& e) {
+	// 	bytes = read(fd, buffer, 1024);
+	// 	if (bytes == 0)
+	// 	{
+	// 		dropClient(fd);// ** BYE BYE
+	// 		close(fd);
+	// 		FD_CLR(fd, &read_fds);
+	// 		return ;
+	// 	}
+	// 	std::cout << buffer << std::endl;
+	// 	FD_SET(fd, &write_fds);
+	// 	FD_CLR(fd, &read_fds);
+	// }
+}
+
+void	serverManager::serveClients(int fd)
+{
+	write(fd, "HTTP/1.1 200 OK\n", 16);
+	write(fd, "Server: oussama khiar\n\n", 23);
+	write(fd, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);
+	std::cout << "+++++++ request sent ++++++++\n";
+	dropClient(fd);
+	close(fd);
+	FD_CLR(fd, &write_fds);
+}
+
 void	serverManager::IOSynchronous(void)
 {
-	int	newsock;
-	struct sockaddr_in	addr;
-	socklen_t len = sizeof(struct sockaddr_in);
-	char buffer[1024];
-	int	bytes;
+	fd_set pre_read_fds, pre_write_fds;
 
 	while (1)
 	{
@@ -115,39 +218,12 @@ void	serverManager::IOSynchronous(void)
 		FD_COPY(&write_fds, &pre_write_fds);
 		if (select(nfds + 1, &pre_read_fds, &pre_write_fds, 0, 0) < 0)
 			return ; // ! handle this
-		// newConnection();
 		for (int i = 0; i <= nfds; ++i)
 		{
 			if (FD_ISSET(i, &pre_read_fds))
-			{
-				try {
-					_vs_endpoint.at(i);
-					newsock = accept(i, (struct sockaddr*)&addr, &len);
-					FD_SET(newsock, &read_fds);
-					nfds = (newsock > nfds ? newsock : nfds);
-				} catch (std::exception& e) {
-					bytes = read(i, buffer, 1024);
-					if (bytes == 0)
-					{
-						close(i); // ** BYE BYE
-						FD_CLR(i, &read_fds);
-						continue ;
-					}
-					std::cout << buffer << std::endl;
-					FD_SET(i, &write_fds);
-					FD_CLR(i, &read_fds);
-				}
-			}
+				handleSocketEvents(i);
 			else if (FD_ISSET(i, &pre_write_fds))
-			{
-				write(i, "HTTP/1.1 200 OK\n", 16);
-				write(i, "Server: oussama khiar\n\n", 23);
-				write(i, "<h1 style=\"color: red;\">Hello World <br>Salah sben-ela</br></h1>\n", 65);
-				std::cout << "+++++++ request sent ++++++++\n";
-				close(i);
-				FD_CLR(i, &write_fds);
-			}
+				serveClients(i);
 		}
-		
 	}
 }
