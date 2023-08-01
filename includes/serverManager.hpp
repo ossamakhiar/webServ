@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 21:57:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/31 18:46:22 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/07/31 22:01:01 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ private:
 	int	nfds; // * the highest fd in fd_set
 
 	fd_set read_fds, write_fds;
+	fd_set pre_read_fds, pre_write_fds;
 
 	// ** private member function
 	void	serveClients(int);

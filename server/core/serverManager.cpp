@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/31 18:55:32 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/01 14:11:52 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ serverManager::serverManager() : nfds(0)
 	}
 	for (std::map<int, std::vector<virtualServer*> >::iterator it = _vs_endpoint.begin(); it != _vs_endpoint.end(); ++it)
 		FD_SET(it->first, &read_fds);
-
 }
 
 serverManager::~serverManager()
@@ -106,6 +105,7 @@ void	serverManager::newClient(int fd, struct sockaddr_in addr)
 	Client *client;
 
 	client = new Client(fd, addr);
+	// ** check the vServer that communicate to & set it to the client
 	_clients[fd] = client;
 }
 
@@ -156,7 +156,7 @@ void	serverManager::readClientRequest(int fd)
 		FD_CLR(fd, &read_fds);
 		return ;
 	}
-	std::cout << buffer << std::endl;
+	std::cout << "\e[1;34mRequest:\e[0m\n" << buffer << std::endl;
 	FD_SET(fd, &write_fds);
 	FD_CLR(fd, &read_fds);
 }
@@ -180,29 +180,59 @@ void	serverManager::serveClients(int fd)
 	write(fd, "HTTP/1.1 200 OK\n", 16);
 	write(fd, "Server: oussama khiar\n\n", 23);
 	write(fd, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);
-	std::cout << "+++++++ request sent ++++++++\n";
+	std::cout << "+++++++ response sent ++++++++\n";
 	// TODO :: check if it's a presistent connection & handle it
 	dropClient(fd);
 	close(fd);
 	FD_CLR(fd, &write_fds);
 }
 
+void	serverManager::acceptNewConnection(void)
+{
+	for (std::map<int, std::vector<virtualServer*> >::iterator it = _vs_endpoint.begin(); it != _vs_endpoint.end(); ++it)
+	{
+		if (!FD_ISSET(it->first, &pre_read_fds))
+			continue ;
+		newsock = accept(it->first, (struct sockaddr*)&addr, &len);
+		if (newsock >= 1024) // * the highest fd number
+		{
+			// ! temporary printing
+			std::cout << "\e[1;31mconnection refused\e[0m -- the sockets set full" << std::endl;
+			close(newsock);
+			return ;
+		}
+		FD_SET(newsock, &read_fds);
+		nfds = (newsock > nfds ? newsock : nfds);
+		std::cout << "\e[1;32mnew connection from: " << inet_ntoa(addr.sin_addr) << "::" << ntohs(addr.sin_port) << "\e[0m\n";
+		newClient(newsock, addr);
+	}
+}
+
+/*
+void	serveClient(void)
+{
+	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		if (FD_ISSET(it->first, &pre_read_fds))
+			// * call the serve function based on the state of the client
+	}
+}*/
+
 void	serverManager::IOSynchronous(void)
 {
-	fd_set pre_read_fds, pre_write_fds;
-
 	while (1)
 	{
 		FD_COPY(&read_fds, &pre_read_fds);
 		FD_COPY(&write_fds, &pre_write_fds);
 		if (select(nfds + 1, &pre_read_fds, &pre_write_fds, 0, 0) < 0)
 			return ; // ! handle this
-		for (int i = 0; i <= nfds; ++i)
-		{
-			if (FD_ISSET(i, &pre_read_fds))
-				handleSocketEvents(i);
-			else if (FD_ISSET(i, &pre_write_fds))
-				serveClients(i);
-		}
+		acceptNewConnection();
+		// for (int i = 0; i <= nfds; ++i)
+		// {
+		// 	if (FD_ISSET(i, &pre_read_fds))
+		// 		handleSocketEvents(i);
+		// 	else if (FD_ISSET(i, &pre_write_fds))
+		// 		serveClients(i);
+		// }
 	}
 }
