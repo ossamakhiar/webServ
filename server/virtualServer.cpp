@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/30 20:25:48 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 22:34:41 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 
 virtualServer::virtualServer() : max_client_body_size(0)
 {
-
+	endpoint.first = "";
+	endpoint.second = -1;
 }
 
 virtualServer::~virtualServer()
@@ -67,6 +68,13 @@ void	virtualServer::setRootDir(const std::string& r)
 {
 	this->root = Helpers::trim(r);
 }
+
+const std::string&	virtualServer::getRootDir(void) const
+{
+	return (root);
+}
+
+// TODO :: Setters
 
 void	virtualServer::setEndpoint(const std::string& listen)
 {

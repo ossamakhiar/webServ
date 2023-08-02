@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 22:00:20 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/28 14:44:23 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 22:24:15 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 locationBlock::locationBlock()
 {
 	autoindex = false;
+	
 }
 
 locationBlock::~locationBlock()
@@ -46,14 +47,10 @@ void	locationBlock::setRoot(const std::string& r)
 
 void	locationBlock::setAllowedMethods(const std::string& inpt)
 {
-	std::vector<std::string> allowed_set;
-
-	allowed_set.push_back("GET");
-	allowed_set.push_back("POST");
-	allowed_set.push_back("DELETE");
 	this->allowed_methods = Helpers::split(inpt, " \t");
 	for (std::vector<std::string>::iterator it = allowed_methods.begin(); it != allowed_methods.end(); ++it)
-		if (!Helpers::elemInside(*it, allowed_set.begin(), allowed_set.end()))
+		if (!(*it == "GET" || *it == "get" || *it == "POST" \
+			|| *it == "post" || *it == "DELETE" || *it == "delete"))
 			throw std::runtime_error("error: bad method");
 }
 

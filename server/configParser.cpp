@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/30 19:09:59 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 22:36:29 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,15 +130,16 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 	std::string					buffer;
 	size_t						skippedLines;
 
-	try{
-		buffer = syntaxChecker.syntaxEvaluation(config_file);
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
-		return (virtualServers);
-	}
+	buffer = syntaxChecker.syntaxEvaluation(config_file);
 	while (!buffer.empty())
 	{
 		virtualServers.push_back(parseServerBlock(buffer));
+		if (virtualServers.back().getEndpoint().second == -1)
+			throw std::runtime_error("listen directive required in server block");
+		if (virtualServers.back().getRootDir().empty())
+			throw std::runtime_error("root dierctive required in server block");
+
+		// ! set the default root to the location taken from the server root
 		skippedLines = buffer.find_first_not_of("\n");
 		// ** skipped new line that stay in the string to avoid extra call
 		buffer.erase(0, skippedLines);

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 21:57:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/31 22:01:01 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 20:48:06 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ private:
 	std::map<int, std::vector<virtualServer*> >	_vs_endpoint;
 
 	std::map<int, Client*>	_clients;
-	int	nfds; // * the highest fd in fd_set
+	int	highest_fd; // * the highest fd in fd_set
 
 	fd_set read_fds, write_fds;
 	fd_set pre_read_fds, pre_write_fds;
@@ -47,12 +47,13 @@ private:
 	// ** private member function
 	void	serveClients(int);
 
-	void	dropClient(int);
+	void	dropClient(int fd);
 	bool	isPassiveSocket(int);
-	void	newClient(int, struct sockaddr_in);
-	void	readClientRequest(int); // ** read the client request to be processed later
-	void	acceptNewConnection(int); // ** accept new iteraction between client
-	void	handleSocketEvents(int); // ** Handle socket events based on whether they are passive or active
+	void	newClient(int, struct sockaddr_in, virtualServer *);
+	//void	readClientRequest(int); // ** read the client request to be processed later
+	void	acceptNewConnection(); // ** accept new iteraction between client
+	void	serveClients(void);
+	//void	handleSocketEvents(); // ** Handle socket events based on whether they are passive or active
 
 	int		createSocket(const char *, const char *);
 	void	createPassiveSockets();

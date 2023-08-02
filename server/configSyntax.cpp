@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/07/28 14:01:48 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 21:52:04 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ bool	configSyntax::checkDirectives(const std::string& directive, size_t size)
 {
 	std::map<std::string, int>::iterator itlow;
 
+	if (!locationDirectives.count(directive))
+		return (false);
 	itlow = locationDirectives.lower_bound(directive);
 	return (directiveOperations(itlow, directive, size));
 }
@@ -68,7 +70,7 @@ bool	configSyntax::checkServerDircs(const std::string& directive, size_t size)
 	std::map<std::string, int>::iterator	itlow;
 
 	itlow = serverDirectives.lower_bound(directive);
-	if (itlow->first != directive || \
+	if (!serverDirectives.count(directive) || \
 		size != static_cast<size_t>(itlow->second) + 1)
 		return (false);
 	return (true);
@@ -80,7 +82,7 @@ size_t	configSyntax::checkLocationStart(const std::string& buff, size_t start)
 	int		state;
 
 	state = 0;
-	for (i = start; buff[i] != '{'; i++)
+	for (i = start; buff[i] && buff[i] != '{'; i++)
 	{
 		if (buff[i] == 32 || buff[i] == '\t' || buff[i] == '\n')
 		{
@@ -106,9 +108,13 @@ void	configSyntax::locationBlock(std::string& buff, size_t& i)
 
 	i += 8;// * skip length of location
 	i = checkLocationStart(buff, i);
-	while (block)
+	while (block && buff[i])
 	{
-		((buff[i] == '\n') && i++);
+		if (buff[i] == '\n')
+		{
+			i++;
+			continue ;
+		}
 		pos = buff.find_first_of("\n", i);
 		directive_line = buff.substr(i, pos - i);
 		tokens = Helpers::split(directive_line, " \t");
@@ -121,13 +127,15 @@ void	configSyntax::locationBlock(std::string& buff, size_t& i)
 			throw std::runtime_error("syntax error: bad location directive");
 		i += directive_line.length();
 	}
+	if (block)
+		throw std::runtime_error("syntax error: unclosed braces");
 }
 
 size_t	configSyntax::serverBlockStart(const std::string& buff, size_t start)
 {
 	size_t	i;
 
-	for (i = start; buff[i] != '{'; i++)
+	for (i = start; buff[i] && buff[i] != '{'; i++)
 	{
 		if (buff[i] == 32 || buff[i] == '\t' || buff[i] == '\n')
 			continue ;
@@ -142,17 +150,19 @@ void	configSyntax::checkBlock(std::string& buff, size_t& i)
 {
 	int							block  = 1;
 	std::string					directive_line;
-	size_t						pos = buff.find_first_of(" \t\n", i);
+	size_t						pos = buff.find_first_of(" \t\n{", i);
 	std::vector<std::string>	tokens;
 
 	if (buff.substr(i, pos - i) != "server")
 		throw std::runtime_error("syntax error: server block error");
-	i += 6; // * skip length of "server"
-	i = serverBlockStart(buff, i);
-	while (block)
+	i = serverBlockStart(buff, i + 6);
+	while (block && buff[i])
 	{
 		if (buff[i] == '\n')
+		{
 			i++;
+			continue ;
+		}
 		pos = buff.find_first_of("\n", i);
 		directive_line = buff.substr(i, pos - i);
 		tokens = Helpers::split(directive_line, " \t");
@@ -167,6 +177,8 @@ void	configSyntax::checkBlock(std::string& buff, size_t& i)
 			i += directive_line.length();
 		}
 	}
+	if (block)
+		throw std::runtime_error("syntax error: unclosed braces");
 }
 
 std::string	configSyntax::syntaxEvaluation(std::ifstream& config_file)
