@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 22:34:03 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 23:05:49 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,9 @@ public:
 	const std::string&	getPort() const;
 	const std::pair<std::string, int>& getEndpoint() const;
 	const std::string&	getRootDir(void) const;
+
+	// ! this function set to the every location that don't have a root dir to the server root
+	//void	setDefaultRoot(void);
 
 	// ! remove this
 	friend std::ostream& operator<<(std::ostream& os, const virtualServer& vs);

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 22:00:20 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 22:24:15 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 23:04:36 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 locationBlock::locationBlock()
 {
 	autoindex = false;
-	
+	root = "";
 }
 
 locationBlock::~locationBlock()
@@ -71,6 +71,15 @@ void	locationBlock::setDirListing(const std::string& inpt)
 	else
 		throw std::runtime_error("error: bad directory listing argument");
 }
+
+// TODO :: Getters
+const std::string& locationBlock::getRoot(void) const
+{
+	return (root);
+}
+
+
+// ****************END*********
 
 std::ostream& operator<<(std::ostream& os, const locationBlock& vs)
 {

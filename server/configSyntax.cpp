@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 21:52:04 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 22:42:05 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,11 +110,8 @@ void	configSyntax::locationBlock(std::string& buff, size_t& i)
 	i = checkLocationStart(buff, i);
 	while (block && buff[i])
 	{
-		if (buff[i] == '\n')
-		{
-			i++;
+		if (buff[i] == '\n' && ++i)
 			continue ;
-		}
 		pos = buff.find_first_of("\n", i);
 		directive_line = buff.substr(i, pos - i);
 		tokens = Helpers::split(directive_line, " \t");
@@ -158,18 +155,16 @@ void	configSyntax::checkBlock(std::string& buff, size_t& i)
 	i = serverBlockStart(buff, i + 6);
 	while (block && buff[i])
 	{
-		if (buff[i] == '\n')
-		{
-			i++;
+		if (buff[i] == '\n' && ++i)
 			continue ;
-		}
 		pos = buff.find_first_of("\n", i);
 		directive_line = buff.substr(i, pos - i);
 		tokens = Helpers::split(directive_line, " \t");
+
 		if (tokens[0] == "}")
 			(block = 0, i++);
 		else if (tokens[0] == "location")
-			locationBlock(buff, i);
+			locationBlock(buff, i); // ? location block check the syntax and skip it
 		else
 		{
 			if (!checkServerDircs(tokens[0], tokens.size()))

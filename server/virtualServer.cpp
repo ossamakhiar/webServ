@@ -6,16 +6,19 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 22:34:41 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 23:06:03 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "virtualServer.hpp"
 
-virtualServer::virtualServer() : max_client_body_size(0)
+virtualServer::virtualServer() : max_client_body_size(500000)
 {
 	endpoint.first = "";
 	endpoint.second = -1;
+	server_name = "";
+	root = "";
+	port = "";
 }
 
 virtualServer::~virtualServer()
@@ -58,7 +61,12 @@ const std::pair<std::string, int>& virtualServer::getEndpoint() const
 	return (endpoint);
 }
 
-// TODO :: setters
+const std::string&	virtualServer::getRootDir(void) const
+{
+	return (root);
+}
+
+// TODO :: Setters
 void	virtualServer::setServerName(const std::string& name)
 {
 	this->server_name = name;
@@ -68,13 +76,6 @@ void	virtualServer::setRootDir(const std::string& r)
 {
 	this->root = Helpers::trim(r);
 }
-
-const std::string&	virtualServer::getRootDir(void) const
-{
-	return (root);
-}
-
-// TODO :: Setters
 
 void	virtualServer::setEndpoint(const std::string& listen)
 {
@@ -111,6 +112,16 @@ void	virtualServer::setMaxBodySize(const std::string& body_s)
 {
 	max_client_body_size = Helpers::safeAtoi(body_s);
 }
+
+
+// void	virtualServer::setDefaultRoot(void) // TODO :: set default root to the location, which taken from the server root
+// {
+// 	for (std::map<std::string, locationBlock>::iterator it = locations.begin(); it != locations.end(); ++it)
+// 		if (it->second.getRoot().empty())
+// 			it->second.setRoot(root);
+// }
+
+// *******************END****************
 
 std::ostream& operator<<(std::ostream& os, const virtualServer& vs)
 {

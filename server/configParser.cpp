@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 22:36:29 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 23:06:15 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,6 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 			throw std::runtime_error("listen directive required in server block");
 		if (virtualServers.back().getRootDir().empty())
 			throw std::runtime_error("root dierctive required in server block");
-
 		// ! set the default root to the location taken from the server root
 		skippedLines = buffer.find_first_not_of("\n");
 		// ** skipped new line that stay in the string to avoid extra call

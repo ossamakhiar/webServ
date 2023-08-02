@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 22:25:24 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/02 23:04:53 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ serverManager::serverManager() : highest_fd(0)
 	configParser	parser("./config/test.conf");
 
 	_virtual_servers = parser.parseConfiguration();
-	// std::cout << _virtual_servers.size() << std::endl;
-	// for (std::vector<virtualServer>::iterator it = _virtual_servers.begin(); it != _virtual_servers.end(); ++it)
-	// 	std::cout << *it << std::endl;
+	std::cout << _virtual_servers.size() << std::endl;
+	for (std::vector<virtualServer>::iterator it = _virtual_servers.begin(); it != _virtual_servers.end(); ++it)
+		std::cout << *it << std::endl;
 	FD_ZERO(&read_fds);
 	FD_ZERO(&write_fds);
 	// FD_ZERO(&pre_read_fds);
