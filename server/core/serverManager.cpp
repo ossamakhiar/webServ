@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 23:04:53 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/03 13:20:14 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ serverManager::serverManager() : highest_fd(0)
 	configParser	parser("./config/test.conf");
 
 	_virtual_servers = parser.parseConfiguration();
-	std::cout << _virtual_servers.size() << std::endl;
-	for (std::vector<virtualServer>::iterator it = _virtual_servers.begin(); it != _virtual_servers.end(); ++it)
-		std::cout << *it << std::endl;
+	// std::cout << _virtual_servers.size() << std::endl;
+	// for (std::vector<virtualServer>::iterator it = _virtual_servers.begin(); it != _virtual_servers.end(); ++it)
+	// 	std::cout << *it << std::endl;
 	FD_ZERO(&read_fds);
 	FD_ZERO(&write_fds);
 	// FD_ZERO(&pre_read_fds);
@@ -139,6 +139,8 @@ void	serverManager::acceptNewConnection(void)
 		if (!FD_ISSET(it->first, &pre_read_fds))
 			continue ;
 		newsock = accept(it->first, (struct sockaddr*)&addr, &len);
+		// std::cout << "\e[1;31mnew Accepted socket : " << newsock << std::endl;
+		fcntl(newsock, F_SETFL, O_NONBLOCK); // ! NONBLOCKING IO MODE
 		// ! fctnl()
 		if (newsock >= 1024) // * the highest fd number
 		{
@@ -149,7 +151,7 @@ void	serverManager::acceptNewConnection(void)
 		}
 		FD_SET(newsock, &read_fds);
 		highest_fd = (newsock > highest_fd ? newsock : highest_fd);
-		std::cout << "\e[1;32mnew connection from: " << inet_ntoa(addr.sin_addr) << "::" << ntohs(addr.sin_port) << "\e[0m\n";
+		std::cout << "\e[1;32mnew connection from: " << inet_ntoa(addr.sin_addr) << "::" << ntohs(addr.sin_port) << "\e[0m" << std::endl;
 		newClient(newsock, addr, it->second.front());
 	}
 }
@@ -172,8 +174,12 @@ void	serverManager::serveClients(void)
 				keys_erase.push_back(fd);
 				continue ;
 			}
-			FD_SET(fd, &write_fds);
-			FD_CLR(fd, &read_fds);
+			if (it->second->getState() == BUILD_RESPONSE)
+			{
+				std::cout << "\e[1;34mRequest Reading Done\e[0m" << std::endl;
+				FD_SET(fd, &write_fds);
+				FD_CLR(fd, &read_fds);
+			}
 		}
 		else if (FD_ISSET(fd, &pre_write_fds))
 		{

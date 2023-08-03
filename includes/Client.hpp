@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:42:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 16:43:36 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/03 14:28:41 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,8 @@ private:
 
 	virtualServer		*_vs;// ** vServer That client communicate to
 
-	requestMessage			_request;
+	requestMessage		_request;
+	e_status_code		_status_code;
 
 public:
 	Client(int fd, struct sockaddr_in addr);

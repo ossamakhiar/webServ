@@ -49,14 +49,14 @@ int main(void)
 	// int	*ptr = &(*it);
 	// *ptr = 1500;
 	// std::cout << vec[0] << std::endl;
-	std::map<std::string, int> m;
-	m.insert(std::pair<std::string, int>("oussama", 15));
+	// std::map<std::string, int> m;
+	// m.insert(std::pair<std::string, int>("oussama", 15));
 
-	try {
-		std::cout << m.at("d") << std::endl;
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
-	}
+	// try {
+	// 	std::cout << m.at("d") << std::endl;
+	// } catch (std::exception& e) {
+	// 	std::cout << e.what() << std::endl;
+	// }
 
 	// std::map<std::string, int>::iterator itt = m.begin();
 	// if (itt == m.end())
@@ -70,6 +70,13 @@ int main(void)
 
 	// if (p == pp)
 	// 	std::cout << "Equal\n";
+
+
+	std::string oussama;
+
+	oussama.append(1, '.');
+	oussama.append(1, '2');
+	std::cout << oussama << std::endl;
 
 	return (0);
 

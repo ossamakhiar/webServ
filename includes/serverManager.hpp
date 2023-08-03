@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 21:57:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 20:48:06 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/03 11:33:15 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <algorithm>
+#include <fcntl.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
