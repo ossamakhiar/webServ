@@ -72,12 +72,9 @@ int main(void)
 	// 	std::cout << "Equal\n";
 
 
-	std::string oussama;
-
-	oussama.append(1, '.');
-	oussama.append(1, '2');
-	std::cout << oussama << std::endl;
-
+    std::string str = "Hello, World!";
+    std::string sub = str.substr(14); // `start` is 20, but the length of `str` is 13
+    std::cout << "Substring: '" << sub << "'\n";
 	return (0);
 
 }

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/03 13:20:14 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/03 22:48:15 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,6 @@ void	serverManager::acceptNewConnection(void)
 		if (!FD_ISSET(it->first, &pre_read_fds))
 			continue ;
 		newsock = accept(it->first, (struct sockaddr*)&addr, &len);
-		// std::cout << "\e[1;31mnew Accepted socket : " << newsock << std::endl;
 		fcntl(newsock, F_SETFL, O_NONBLOCK); // ! NONBLOCKING IO MODE
 		// ! fctnl()
 		if (newsock >= 1024) // * the highest fd number

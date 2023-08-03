@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/03 14:50:16 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/03 22:49:06 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void	Client::readRequest()
 
 	try {
 		this->_request.requestHandling(client_socket);
-		// * this state of the request handler will set when the parsing phase ends
+		// * this state of the request handler will set when the parsing phase and body reading ends
 		if (_request.getReqState() == DONE_REQ)
 		{
 			client_state = BUILD_RESPONSE;

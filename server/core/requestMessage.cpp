@@ -94,6 +94,7 @@ void	requestMessage::readReqMsg(int client_sock)
 	char		buffer[BUFFER_MSG + 1] = {0};
 	size_t		header_end;
 
+	std::cout << "Reading......." << std::endl;
 	bytes = read(client_sock, buffer, BUFFER_MSG);
 	if (bytes == -1)
 		throw (INTERNAL_SERVER_ERROR);
@@ -104,10 +105,9 @@ void	requestMessage::readReqMsg(int client_sock)
 	header_end = _req_message.find("\r\n\r\n");
 	if (header_end != std::string::npos)
 	{
-		_req_header = _req_message.substr(0, header_end);
-		_req_message = _req_message.substr(_req_header.length() + 4); // ! attention -- binary body
+		_req_header = _req_message.substr(0, header_end + 2);
+		_req_message = _req_message.substr(_req_header.length() + 2); // ! attention -- binary body
 		std::cout << "\e[1;35m**********HEADER FOUND***********\e[0m"  << std::endl;
-		//std::cout << _req_header << std::endl;
 		handling_state = PARSING_REQ;
 	}
 }
@@ -130,40 +130,22 @@ size_t	requestMessage::request_line(void)
 
 void	requestMessage::headerParsing(void)
 {
-	size_t 		i;
-	int			state = KEY_FIELD;
+	size_t		i = 0, pos, colon_pos;
 	std::string	field_key;
 	std::string	field_value;
 
-	// ! Fuck rewrite this.....
 	i = request_line();
 	while (i < _req_header.length())
 	{
-		if (_req_header[i] == '\r' || _req_header[i] == '\n')
-		{
-			if (_req_header[i] == '\n' || _req_header[i + 1] != '\n')
-			{
-				throw (BAD_REQUEST);
-			}
-			i += 2;
-			state = SET_FIELD;
-		}
-		if (_req_header[i] == ':' && state == KEY_FIELD \
-			&& ++i && (state = VALUE_FIELD))
-			continue ;
-		if (state == KEY_FIELD)
-			field_key.append(1, _req_header[i]);
-		else if (state == VALUE_FIELD)
-			field_value.append(1, _req_header[i]);
-		else
-		{
-			if (_setters_map.count(field_key))
-				(this->*(_setters_map[field_key]))(field_value);
-			(field_key.clear(), field_value.clear()); // * clear the strings
-			state = KEY_FIELD;
-			continue ;
-		}
-		i++;
+		colon_pos = _req_header.find_first_of(":", i);
+		pos = _req_header.find("\r\n", i + 1);
+		field_key = _req_header.substr(i, colon_pos - i);
+		field_value = _req_header.substr(colon_pos + 1, pos - colon_pos - 1);
+		std::cout << "Key: " << field_key << std::endl;
+		std::cout << "Value: " << field_value << std::endl;
+		// if (pos == std::string::npos) // ! handle overflow when incremet by 2 because \r\n not found in the last line
+		// 	break ;
+		i = pos + 2;
 	}
 }
 

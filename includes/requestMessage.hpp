@@ -58,6 +58,8 @@ private:
 	std::string	_req_header;
 	std::string	_req_body;
 
+	std::map<std::string, std::string> _header_fields;
+
 	bool		_presistent_con;
 	int			_content_len; // ! mandatory in case request has a body message
 	std::string	_hostname; // ! make it mandatory :)
