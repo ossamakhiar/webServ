@@ -80,3 +80,33 @@ void	Helpers::retCheck(int ret, const std::string& msg)
 	std::cout << "here...\n";
 	throw Helpers::exceptionError(msg);
 }
+
+std::string	Helpers::strTolower(const std::string& str)
+{
+	size_t i = -1;
+	std::string	ret;
+
+	ret = str;
+	while (ret[++i])
+		if (ret[i] >= 'A' && ret[i] <= 'Z')
+			ret[i] += 32;
+	return (ret);
+}
+
+// ! make this more smarter
+char			Helpers::hexaToDecimal(const std::string& hex)
+{
+	int	digit1 = 0;
+	int	digit2 = 0;
+
+	if (hex[0] <= '9' && hex[0] >= '0')
+		digit1 = hex[0] - 48;
+	if (hex[0] >= 'a' && hex[0] <= 'f')
+		digit1 = hex[0] - 87;
+	if (hex[1] <= '9' && hex[1] >= '0')
+		digit2 = hex[1] - 48;
+	if (hex[1] >= 'a' && hex[1] <= 'f')
+		digit2 = hex[1] - 87;
+	digit1 *= 16;
+	return (digit1 + digit2);
+}

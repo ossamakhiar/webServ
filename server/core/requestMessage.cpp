@@ -15,9 +15,9 @@
 requestMessage::requestMessage() : _presistent_con(true), _content_len(0)
 {
 	handling_state = READING_REQ;
-	_setters_map.insert(std::pair<std::string, funcSetter>("Content-Type", &requestMessage::setContentType));
-	_setters_map.insert(std::pair<std::string, funcSetter>("Host", &requestMessage::setHostname));
-	_setters_map.insert(std::pair<std::string, funcSetter>("Connection", &requestMessage::setConnectionType));
+	// _setters_map.insert(std::pair<std::string, funcSetter>("Content-Type", &requestMessage::setContentType));
+	// _setters_map.insert(std::pair<std::string, funcSetter>("Host", &requestMessage::setHostname));
+	// _setters_map.insert(std::pair<std::string, funcSetter>("Connection", &requestMessage::setConnectionType));
 }
 
 requestMessage::requestMessage(const requestMessage& other)
@@ -47,10 +47,28 @@ int	requestMessage::getReqState(void) const
 }
 
 // TODO :: Setters
+// ! This fucking function ****
 void	requestMessage::setReqURI(const std::string& uri)
 {
-	// TODO :: check URI
-	_URI = uri;
+		_URI.resize(uri.length());
+	size_t	i = 0, j = 0;
+
+	// _URI = uri;
+	while (i < uri.length())
+	{
+		if (uri[i] != '%')
+		{
+			_URI[j] = uri[i];
+			j++, i++;
+			continue ;
+		}
+		i++;
+		// std::cout << uri.substr(i, 2) << std::endl;
+		_URI[j++] = Helpers::hexaToDecimal(Helpers::strTolower(uri.substr(i, 2)));
+		// std::cout << "*" << _URI[j - 1] << "*\n";
+		i += 2;
+	}
+	std::cout << _URI.length() << " *" << _URI << "*" << std::endl;
 }
 
 void	requestMessage::setMethod(const std::string& method)
@@ -69,22 +87,28 @@ void	requestMessage::setHttpVersion(const std::string& version)
 	_http_version = version;
 }
 
-void	requestMessage::setContentType(const std::string& t)
-{
-	_content_type = t;
-}
-
-void	requestMessage::setHostname(const std::string& host)
-{
-	_hostname = host;
-}
-
 void	requestMessage::setConnectionType(const std::string& type)
 {
 	_presistent_con = true;
 	if (type == "close")
 		_presistent_con = false;
 }
+
+void	requestMessage::setContentLen(const std::string& len)
+{
+	try
+	{
+		_content_len = Helpers::safeAtoi(len);
+	} catch (std::exception& e) {
+		throw (BAD_REQUEST);
+	}
+}
+
+// void	requestMessage::setContentType(const std::string& t)
+// {
+// 	_content_type = t;
+// }
+
 
 // TODO :: REQUEST HANDLING {READING, PARSING..}
 
@@ -138,15 +162,16 @@ void	requestMessage::headerParsing(void)
 	while (i < _req_header.length())
 	{
 		colon_pos = _req_header.find_first_of(":", i);
-		pos = _req_header.find("\r\n", i + 1);
+		pos = _req_header.find("\r\n", i);
 		field_key = _req_header.substr(i, colon_pos - i);
-		field_value = _req_header.substr(colon_pos + 1, pos - colon_pos - 1);
-		std::cout << "Key: " << field_key << std::endl;
-		std::cout << "Value: " << field_value << std::endl;
-		// if (pos == std::string::npos) // ! handle overflow when incremet by 2 because \r\n not found in the last line
-		// 	break ;
+		field_value = Helpers::trim(_req_header.substr(colon_pos + 1, pos - colon_pos - 1));
+		_header_fields[field_key] = field_value;
 		i = pos + 2;
 	}
+	if (_header_fields.count("Connection"))
+		setConnectionType(_header_fields["Connection"]);
+	if (_header_fields.count("Content-Length"))
+		setContentLen(_header_fields["Content-Length"]);
 }
 
 void	requestMessage::requestHandling(int client_sock)
@@ -174,8 +199,8 @@ std::ostream&	operator<<(std::ostream& os, const requestMessage& req)
 	os << "URI: " << req._URI << std::endl;
 	os << "HTTP Version: " << req._http_version << std::endl;
 	os << "Persistent Connection: " << std::boolalpha << req._presistent_con << std::endl;
-	os << "Host: " << req._hostname << std::endl;
-	os << "Content-type: " << req._content_type << std::endl;
+	for (std::map<std::string, std::string>::const_iterator it = req._header_fields.begin(); it != req._header_fields.end(); ++it)
+		std::cout << it->first << ": " << it->second << std::endl;
 
 	return (os);
 }

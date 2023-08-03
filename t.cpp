@@ -39,6 +39,24 @@
 #include <vector>
 #include <map>
 
+int			hexaToDecimal(const std::string& hex)
+{
+	int	digit1 = 0;
+	int	digit2 = 0;
+
+	if (hex[0] <= '9' && hex[0] >= '0')
+		digit1 = hex[0] - 48;
+	if (hex[0] >= 'a' && hex[0] <= 'f')
+		digit1 = hex[0] - 87;
+	if (hex[1] <= '9' && hex[1] >= '0')
+		digit2 = hex[1] - 48;
+	if (hex[1] >= 'a' && hex[1] <= 'f')
+		digit2 = hex[1] - 87;
+	digit1 *= 16;
+	digit1 += digit2;
+	return (digit1);
+}
+
 int main(void)
 {
 	// int	x = 15;
@@ -72,9 +90,7 @@ int main(void)
 	// 	std::cout << "Equal\n";
 
 
-    std::string str = "Hello, World!";
-    std::string sub = str.substr(14); // `start` is 20, but the length of `str` is 13
-    std::cout << "Substring: '" << sub << "'\n";
+	std::cout << (int)hexaToDecimal("d3") << std::endl;
 	return (0);
 
 }

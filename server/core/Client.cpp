@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/03 22:49:06 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/03 23:14:00 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,7 @@ void	Client::readRequest()
 		}
 	} catch (e_status_code code) {
 		_status_code = code;
+		client_state = BUILD_RESPONSE;
 		std::cout << "ERROR THROWED: " << code << std::endl;
 		if (code == ZERO_READED)
 			client_state = DISCONNECTED;

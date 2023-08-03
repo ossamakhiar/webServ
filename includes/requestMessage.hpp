@@ -19,7 +19,7 @@
 
 # define BUFFER_MSG 400
 
-class requestMessage;
+// class requestMessage;
 
 enum e_handling_states
 {
@@ -46,12 +46,12 @@ enum e_field_states
 	SET_FIELD
 };
 
-typedef void (requestMessage::*funcSetter)(const std::string&);
+// typedef void (requestMessage::*funcSetter)(const std::string&);
 
 class requestMessage
 {
 private:
-	std::map<std::string, funcSetter>	_setters_map;
+	// std::map<std::string, funcSetter>	_setters_map;
 
 	int			handling_state;
 	std::string	_req_message; // ** store the request message
@@ -63,7 +63,6 @@ private:
 	bool		_presistent_con;
 	int			_content_len; // ! mandatory in case request has a body message
 	std::string	_hostname; // ! make it mandatory :)
-	std::string	 _content_type;
 	std::string	_method;
 	std::string	_URI;
 	std::string	_http_version;
@@ -82,9 +81,10 @@ public:
 	void	setReqURI(const std::string&);
 	void	setMethod(const std::string&);
 	void	setHttpVersion(const std::string&);
-	void	setContentType(const std::string&);
-	void	setHostname(const std::string&);
+	// void	setContentType(const std::string&);
+	// void	setHostname(const std::string&);
 	void	setConnectionType(const std::string&);
+	void	setContentLen(const std::string&);
 
 
 	// * Getters
