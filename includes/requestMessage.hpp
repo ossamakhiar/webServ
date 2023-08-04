@@ -46,10 +46,10 @@ enum e_status_code
 class requestMessage
 {
 private:
-	int			handling_state;
-	std::string	_req_message; // ** store the request message
-	std::string	_req_header;
-	std::string	_req_body_;
+	// int							readed_body;
+	int							handling_state;
+	std::string					_req_message; // ** store the request message
+	std::string					_req_header;
 	std::vector<unsigned char>	_req_body;
 
 	// ? To define the server that client want to interact with.
@@ -73,7 +73,7 @@ private:
 	void	headerParsing(void);
 	void	headerExtracting(char *, int);
 
-	void	openAndWrite(void);
+	void	openAndWrite(bool c = false);
 	void	isBodyComplete(void);
 	void	extractBodyContent(char *buffer, int bytes);
 

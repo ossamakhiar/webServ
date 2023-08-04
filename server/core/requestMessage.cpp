@@ -88,11 +88,15 @@ void	requestMessage::setProperVS(void)
 			_vs = (*it);
 }
 
+
+
 void	requestMessage::extractBodyContent(char *buffer, int bytes)
 {
-	std::cout << (void *)buffer << std::endl;
-	(void)bytes;
-	handling_state = DONE_REQ;
+	for (size_t i = 0; i < static_cast<size_t>(bytes) && _content_len > 0; ++i, --_content_len)
+		_req_body.push_back(buffer[i]);
+	handling_state = ((!_content_len) ? DONE_REQ : handling_state);
+	openAndWrite();
+	_req_body.clear(); // ! clear the body that is written on the file
 }
 
 // TODO :: REQUEST HANDLING {READING, PARSING..}
@@ -193,23 +197,26 @@ void	requestMessage::print_body()
 	std::cout << "**************************************************" << std::endl;
 }
 
-void	requestMessage::openAndWrite(void)
+void	requestMessage::openAndWrite(bool creation_flag)
 {
 	int	fd;
 
-	fd = open("file.ext", O_APPEND | O_WRONLY | O_CREAT);
+	// if (_req_body.size() == 0)
+	// 	return ;
+	fd = (creation_flag ? open("file.ext", O_WRONLY | O_CREAT, 0666) : open("file.ext", O_APPEND | O_WRONLY));
+	if (fd == -1)
+		throw (INTERNAL_SERVER_ERROR);
 	for (std::vector<unsigned char>::iterator it = _req_body.begin(); it != _req_body.end(); ++it)
-	{
 		if (write(fd, &(*it), 1) == -1)
 			throw (INTERNAL_SERVER_ERROR);
-	}
 	close(fd);
 }
 
 void	requestMessage::isBodyComplete(void)
 {
-	openAndWrite(); // ! Write the body on a file
-	if (_req_body.size() == static_cast<size_t>(_content_len))
+	openAndWrite(true); // ! Write the body on a file
+	_content_len -= _req_body.size(); // * subtract the readed bytes from the content length
+	if (!_content_len) // ! this check maybe the right position in body extracting
 		handling_state = DONE_REQ;
 	else
 		handling_state = READING_BODY_REQ;
@@ -229,10 +236,9 @@ void	requestMessage::requestHandling(int client_sock)
 		headerParsing();
 		// ! you shoould set the state to the Reading for reading the body
 		// ** Check if the method that is the request used is POST then continue reading the body
+		handling_state = DONE_REQ;
 		if (_method == "POST")
 			isBodyComplete();
-		else
-			handling_state = DONE_REQ;
 	}
 }
 
