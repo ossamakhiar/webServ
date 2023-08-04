@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 23:06:03 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/04 15:03:03 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void	virtualServer::setEndpoint(const std::string& listen)
 		throw Helpers::exceptionError("bad endpoint input");
 	freeaddrinfo(res);
 	this->port = tokens[1];
-	endpoint.first = tokens[0];
+	endpoint.first = Helpers::strTolower(tokens[0]);
 	port = Helpers::safeAtoi(tokens[1]);
 	endpoint.second = port;
 }

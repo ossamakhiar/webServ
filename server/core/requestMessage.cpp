@@ -12,27 +12,12 @@
 
 #include "requestMessage.hpp"
 
-requestMessage::requestMessage() : _presistent_con(true), _content_len(0)
+requestMessage::requestMessage(std::vector<virtualServer*> &ends_v, virtualServer *&vs) : _vs_endpoint(ends_v), \
+		_vs(vs), \
+		_presistent_con(true), \
+		_content_len(0)
 {
 	handling_state = READING_REQ;
-	// _setters_map.insert(std::pair<std::string, funcSetter>("Content-Type", &requestMessage::setContentType));
-	// _setters_map.insert(std::pair<std::string, funcSetter>("Host", &requestMessage::setHostname));
-	// _setters_map.insert(std::pair<std::string, funcSetter>("Connection", &requestMessage::setConnectionType));
-}
-
-requestMessage::requestMessage(const requestMessage& other)
-{
-	*this = other;
-}
-
-requestMessage& requestMessage::operator=(const requestMessage& rhs)
-{
-	if (this == &rhs)
-		return (*this);
-	_presistent_con = rhs._presistent_con;
-	_content_len = rhs._content_len;
-	handling_state = rhs.handling_state;
-	return (*this);
 }
 
 requestMessage::~requestMessage()
@@ -46,34 +31,27 @@ int	requestMessage::getReqState(void) const
 	return (handling_state);
 }
 
+
 // TODO :: Setters
-// ! This fucking function ****
 void	requestMessage::setReqURI(const std::string& uri)
 {
-		_URI.resize(uri.length());
-	size_t	i = 0, j = 0;
+	size_t	i = 0;
 
-	// _URI = uri;
 	while (i < uri.length())
 	{
 		if (uri[i] != '%')
 		{
-			_URI[j] = uri[i];
-			j++, i++;
+			_URI += uri[i++];
 			continue ;
 		}
 		i++;
-		// std::cout << uri.substr(i, 2) << std::endl;
-		_URI[j++] = Helpers::hexaToDecimal(Helpers::strTolower(uri.substr(i, 2)));
-		// std::cout << "*" << _URI[j - 1] << "*\n";
+		_URI += Helpers::hexaToDecimal(Helpers::strTolower(uri.substr(i, 2)));
 		i += 2;
 	}
-	std::cout << _URI.length() << " *" << _URI << "*" << std::endl;
 }
 
 void	requestMessage::setMethod(const std::string& method)
 {
-	// TODO :: check method
 	if  (!(method == "GET" || method == "POST" || method == "DELETE"))
 		throw (METHOD_NOT_IMPLEMENTED);
 	_method = method;
@@ -81,7 +59,6 @@ void	requestMessage::setMethod(const std::string& method)
 
 void	requestMessage::setHttpVersion(const std::string& version)
 {
-	// TODO :: check Http Version
 	if (version != "HTTP/1.1")
 		throw (HTTP_VERSION_NOT_SUPPORTED);
 	_http_version = version;
@@ -104,14 +81,16 @@ void	requestMessage::setContentLen(const std::string& len)
 	}
 }
 
-// void	requestMessage::setContentType(const std::string& t)
-// {
-// 	_content_type = t;
-// }
+void	requestMessage::setProperVS(void)
+{
+	for (std::vector<virtualServer*>::iterator it = _vs_endpoint.begin(); it != _vs_endpoint.end(); ++it)
+		if ((*it)->getEndpoint().first == _hostname.substr(0, _hostname.find(':')))
+			_vs = (*it);
+}
+
 
 
 // TODO :: REQUEST HANDLING {READING, PARSING..}
-
 void	requestMessage::readReqMsg(int client_sock)
 {
 	int			bytes;
@@ -147,9 +126,18 @@ size_t	requestMessage::request_line(void)
 	setMethod(tokens[0]);
 	setReqURI(tokens[1]);
 	setHttpVersion(tokens[2]);
-
-	// std::cout << "REQUEST LINE: " << req_line << std::endl;
 	return (pos + 2);
+}
+
+void	requestMessage::setImportantFields(void)
+{
+	if (_header_fields.count("Connection"))
+		setConnectionType(_header_fields["Connection"]);
+	if (_header_fields.count("Content-Length"))
+		setContentLen(_header_fields["Content-Length"]);
+	if (!_header_fields.count("Host"))
+		throw (BAD_REQUEST);
+	_hostname = _header_fields["Host"];
 }
 
 void	requestMessage::headerParsing(void)
@@ -168,12 +156,12 @@ void	requestMessage::headerParsing(void)
 		_header_fields[field_key] = field_value;
 		i = pos + 2;
 	}
-	if (_header_fields.count("Connection"))
-		setConnectionType(_header_fields["Connection"]);
-	if (_header_fields.count("Content-Length"))
-		setContentLen(_header_fields["Content-Length"]);
+	setImportantFields();
+	setProperVS();
 }
 
+
+// ! read body
 void	requestMessage::requestHandling(int client_sock)
 {
 	if (handling_state == READING_REQ)
@@ -189,6 +177,16 @@ void	requestMessage::requestHandling(int client_sock)
 		handling_state = DONE_REQ;
 	}
 }
+
+
+
+
+
+
+
+
+
+
 
 // ************END************
 

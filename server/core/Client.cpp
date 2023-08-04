@@ -6,18 +6,15 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/03 23:14:00 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/04 15:07:07 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client() : client_state(READING_REQUEST)
-{
-
-}
-
-Client::Client(int fd, struct sockaddr_in addr) : _vs(NULL)
+Client::Client(int fd, struct sockaddr_in addr, std::vector<virtualServer*>	&ends_vs) : _vs_endpoint(ends_vs), \
+	_vs(NULL),
+	_request(_vs_endpoint, _vs)
 {
 	client_state = READING_REQUEST;
 	this->client_socket = fd;
@@ -27,21 +24,6 @@ Client::Client(int fd, struct sockaddr_in addr) : _vs(NULL)
 Client::~Client()
 {
 
-}
-
-Client::Client(const Client& other)
-{
-	*this = other;
-}
-
-Client& Client::operator=(const Client& rhs)
-{
-	if (this == &rhs)
-		return (*this);
-	client_state = rhs.client_state;
-	this->client_socket = rhs.client_socket;
-	this->client_addr = rhs.client_addr;
-	return (*this);
 }
 
 // TODO :: Setters
@@ -86,6 +68,8 @@ void	Client::readRequest()
 
 void	Client::makeResponse(void)
 {
+	if (_vs)
+		std::cout << *_vs << std::endl;
 	write(client_socket, "HTTP/1.1 200 OK\n", 16);
 	write(client_socket, "Server: oussama khiar\n\n", 23);
 	write(client_socket, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);

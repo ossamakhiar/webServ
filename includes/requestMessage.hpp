@@ -14,12 +14,11 @@
 # define REQUESTMESSAGE_HPP
 
 #include <map>
-#include "helpers.hpp"
 #include <unistd.h>
+#include "helpers.hpp"
+#include "virtualServer.hpp"
 
 # define BUFFER_MSG 400
-
-// class requestMessage;
 
 enum e_handling_states
 {
@@ -39,24 +38,19 @@ enum e_status_code
 	ZERO_READED = -1
 };
 
-enum e_field_states
-{
-	KEY_FIELD,
-	VALUE_FIELD,
-	SET_FIELD
-};
-
-// typedef void (requestMessage::*funcSetter)(const std::string&);
 
 class requestMessage
 {
 private:
-	// std::map<std::string, funcSetter>	_setters_map;
-
 	int			handling_state;
 	std::string	_req_message; // ** store the request message
 	std::string	_req_header;
 	std::string	_req_body;
+
+	// ? To define the server that client want to interact with.
+	std::vector<virtualServer*> &_vs_endpoint;
+	virtualServer		*&_vs;
+	// **************
 
 	std::map<std::string, std::string> _header_fields;
 
@@ -70,30 +64,31 @@ private:
 
 	// ** private members function
 	size_t	request_line(void);
+	void	readReqMsg(int client_sock);
+	void	headerParsing(void);
 
-public:
-	requestMessage();
-	~requestMessage();
 	requestMessage(const requestMessage&);
 	requestMessage& operator=(const requestMessage&);
+public:
+	requestMessage(std::vector<virtualServer*>&, virtualServer *&);
+	~requestMessage();
 
 	// * Setters
 	void	setReqURI(const std::string&);
 	void	setMethod(const std::string&);
 	void	setHttpVersion(const std::string&);
-	// void	setContentType(const std::string&);
-	// void	setHostname(const std::string&);
 	void	setConnectionType(const std::string&);
 	void	setContentLen(const std::string&);
+
+	void	setProperVS(void);
+	void	setImportantFields(void);
 
 
 	// * Getters
 	int	getReqState(void) const;
 
-	// void	fillRequestMessage(const std::string& req);
+
 	void	requestHandling(int client_sock);
-	void	readReqMsg(int client_sock);
-	void	headerParsing(void);
 
 	// ! remove this
 	friend std::ostream&	operator<<(std::ostream& os, const requestMessage& req);

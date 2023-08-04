@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/03 22:48:15 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/04 14:50:23 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,8 @@ serverManager::serverManager() : highest_fd(0)
 	configParser	parser("./config/test.conf");
 
 	_virtual_servers = parser.parseConfiguration();
-	// std::cout << _virtual_servers.size() << std::endl;
-	// for (std::vector<virtualServer>::iterator it = _virtual_servers.begin(); it != _virtual_servers.end(); ++it)
-	// 	std::cout << *it << std::endl;
 	FD_ZERO(&read_fds);
 	FD_ZERO(&write_fds);
-	// FD_ZERO(&pre_read_fds);
-	// FD_ZERO(&pre_write_fds);
 	createPassiveSockets();
 	for (std::map<int, std::vector<virtualServer*> >::iterator it = _vs_endpoint.begin(); it != _vs_endpoint.end(); ++it)
 	{
@@ -101,13 +96,13 @@ void	serverManager::createPassiveSockets(void)
 	}
 }
 
-void	serverManager::newClient(int fd, struct sockaddr_in addr, virtualServer *vs)
+void	serverManager::newClient(int fd, struct sockaddr_in addr, std::vector<virtualServer*> &vs)
 {
 	Client *client;
 
-	client = new Client(fd, addr);
+	client = new Client(fd, addr, vs);
 	// ** check the vServer that communicate to & set it to the client
-	client->setVS(vs);
+	client->setVS(vs.front());
 	_clients[fd] = client;
 }
 
@@ -151,7 +146,7 @@ void	serverManager::acceptNewConnection(void)
 		FD_SET(newsock, &read_fds);
 		highest_fd = (newsock > highest_fd ? newsock : highest_fd);
 		std::cout << "\e[1;32mnew connection from: " << inet_ntoa(addr.sin_addr) << "::" << ntohs(addr.sin_port) << "\e[0m" << std::endl;
-		newClient(newsock, addr, it->second.front());
+		newClient(newsock, addr, it->second);
 	}
 }
 

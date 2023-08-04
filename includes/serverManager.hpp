@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 21:57:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/03 11:33:15 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/04 14:50:00 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ private:
 
 	void	dropClient(int fd);
 	bool	isPassiveSocket(int);
-	void	newClient(int, struct sockaddr_in, virtualServer *);
+	void	newClient(int, struct sockaddr_in, std::vector<virtualServer*> &);
 	//void	readClientRequest(int); // ** read the client request to be processed later
 	void	acceptNewConnection(); // ** accept new iteraction between client
 	void	serveClients(void);
