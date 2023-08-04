@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/04 15:07:07 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/04 19:09:54 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,9 @@ void	Client::readRequest()
 
 void	Client::makeResponse(void)
 {
-	if (_vs)
-		std::cout << *_vs << std::endl;
+	// if (_vs)
+	// 	std::cout << *_vs << std::endl;
+	std::cout << "send request by meeeee\n";
 	write(client_socket, "HTTP/1.1 200 OK\n", 16);
 	write(client_socket, "Server: oussama khiar\n\n", 23);
 	write(client_socket, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);

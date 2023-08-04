@@ -15,14 +15,17 @@
 
 #include <map>
 #include <unistd.h>
+#include <fcntl.h>
 #include "helpers.hpp"
 #include "virtualServer.hpp"
 
 # define BUFFER_MSG 400
+# define MAX_REQ_URI 8192
 
 enum e_handling_states
 {
 	READING_REQ,
+	READING_BODY_REQ,
 	PARSING_REQ,
 	DONE_REQ
 };
@@ -31,6 +34,7 @@ enum e_status_code
 {
 	OK = 200,
 	BAD_REQUEST = 400,
+	REQUEST_URI_TOO_LONG = 414,
 	INTERNAL_SERVER_ERROR = 500,
 	METHOD_NOT_IMPLEMENTED = 501,
 	HTTP_VERSION_NOT_SUPPORTED = 505,
@@ -45,7 +49,8 @@ private:
 	int			handling_state;
 	std::string	_req_message; // ** store the request message
 	std::string	_req_header;
-	std::string	_req_body;
+	std::string	_req_body_;
+	std::vector<unsigned char>	_req_body;
 
 	// ? To define the server that client want to interact with.
 	std::vector<virtualServer*> &_vs_endpoint;
@@ -66,6 +71,11 @@ private:
 	size_t	request_line(void);
 	void	readReqMsg(int client_sock);
 	void	headerParsing(void);
+	void	headerExtracting(char *, int);
+
+	void	openAndWrite(void);
+	void	isBodyComplete(void);
+	void	extractBodyContent(char *buffer, int bytes);
 
 	requestMessage(const requestMessage&);
 	requestMessage& operator=(const requestMessage&);
@@ -91,6 +101,7 @@ public:
 	void	requestHandling(int client_sock);
 
 	// ! remove this
+	void	print_body();
 	friend std::ostream&	operator<<(std::ostream& os, const requestMessage& req);
 };
 

@@ -15,10 +15,11 @@ void	func(int& x)
 
 int main(void)
 {
+	std::vector<int> v;
 
-	int	x = 15;
-	func(x);
-	std::cout << x << std::endl;
+	for (int i = 0; i < 5; ++i)
+		v[i] = 10;
+	std::cout << v.size() << std::endl;
 	return (0);
 
 }
