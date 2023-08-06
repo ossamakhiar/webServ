@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:28:57 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 18:38:39 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 18:47:11 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ public:
 	ftString	substr(size_t pos, size_t len = npos);
 	size_t		size(void) const;
 
-	size_t		find(const char* str, size_t pos = 0);
+	size_t		find(const char* str, size_t pos = 0) const;
 
 	char&	at(size_t pos) const;
 
