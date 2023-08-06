@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:28:57 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 18:47:11 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 19:35:09 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ private:
 	char	*_str;
 	size_t	_size;
 
-	size_t strlen(const char *);
+	size_t strlen(const char *) const;
 
 public:
 	static const size_t npos = -1;

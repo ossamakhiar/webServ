@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 18:47:03 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 19:37:13 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ size_t	ftString::size(void) const
 	return (_size);
 }
 
-size_t	ftString::strlen(const char *str)
+size_t	ftString::strlen(const char *str) const
 {
 	size_t i = 0;
 
@@ -126,7 +126,7 @@ ftString	ftString::substr(size_t pos, size_t len)
 
 	if (pos >= _size)
 		throw std::runtime_error("out of range");
-	if (len > _size - pos) // ! now this is true
+	if (len > _size - pos) // ! now this is good
 		len = _size - pos;
 	delete[] (ret._str);
 	ret._str = new char[len + 1];

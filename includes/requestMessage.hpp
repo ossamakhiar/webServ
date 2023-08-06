@@ -21,7 +21,7 @@
 #include "bufferQueuing.hpp"
 
 # define BUFFER_MSG 500
-# define MAX_REQ_URI 20048
+# define MAX_REQ_URI 8192
 
 enum e_handling_states
 {

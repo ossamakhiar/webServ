@@ -109,6 +109,8 @@ void	requestMessage::openAndWrite(const char* data, size_t size, bool creation_f
 
 void	requestMessage::chunked_approach(const char *buffer, int bytes, bool creation_flag)
 {
+	if (creation_flag)
+		std::cout << "handling in chuncked approach...\n";
 	TE_reader.bufferFeed(buffer, bytes);
 	TE_reader.processAndShiftData();
 	// ! getbuffer should return all the chunks that is full...

@@ -6,13 +6,15 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 17:16:08 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 16:08:47 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 21:57:28 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "bufferQueuing.hpp"
 
-bufferQueuing::bufferQueuing() : start(0), size(0), last_chunk(false)
+// ? Transfer encoding chunked, helper
+
+bufferQueuing::bufferQueuing() : size_extracted(false), start(0), size(0), last_chunk(false)
 {
 	
 }
@@ -61,6 +63,7 @@ void	bufferQueuing::clear_data(void)
 
 void	bufferQueuing::bufferFeed(const char *buffer, int bytes)
 {
+	// std::cout << buffer << std::endl;
 	for (size_t i = 0; i < static_cast<size_t>(bytes); ++i)
 		buffer_queue.push_back(buffer[i]);
 }
@@ -90,20 +93,22 @@ void	bufferQueuing::processAndShiftData(void)
 
 	if (!size_extracted)
 	{
+		// if (!start)
+		// 	std::cout << "here.........\n";
 		try {
 			size = extractSize(); // ? back here
 		} catch (...) {
 			return ;
 		}
 	}
-	// std::cout << "\e[1;32mSize: \e[0m" << size << std::endl;
+	// std::cout << "\e[1;32mSIZE\e[0m: " << size << std::endl;
 	if (size == 0){
 		last_chunk = true;
+		size_extracted = false;
 		return ; 
 	}
-	if ((buffer_queue.size() - start - 2 < size)) // ! if not possible to extract the size
+	if ((buffer_queue.size() - start - 2 < size)) // ! if not possible to extract the the whole chunk
 		return ; // * POP
-	// ! store size to use it in rec call
 	while(i < size)
 	{
 		// std::cout << buffer_queue[start + i] << std::endl;
