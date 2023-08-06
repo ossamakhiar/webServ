@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include "includes/ftString.hpp"
 
 int	getDigit(const char& c)
 {
@@ -52,10 +53,22 @@ std::string	randomFileNameGen(void)
 	return (file_name);
 }
 
+void	func()
+{
+	ftString	str = "oussama";
+
+	std::cout << "size: " << str.size() << " " << str << std::endl;
+	str.append(" khiar fdhdf");
+	std::cout << str << std::endl;
+	std::cout << str.substr(2, ftString::npos) << std::endl;
+	std::cout << str.find("khiar", 9) << std::endl;
+	std::cout << str[8] << std::endl;
+}
+
 int main(void)
 {
-	// std::cout << hexaToInteger("10") << std::endl;
-	std::cout << randomFileNameGen() << std::endl;
+	func();
+	system("leaks a.out");
 	return (0);
 
 }

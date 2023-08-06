@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 17:16:08 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 15:50:00 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 16:08:47 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,22 +65,6 @@ void	bufferQueuing::bufferFeed(const char *buffer, int bytes)
 		buffer_queue.push_back(buffer[i]);
 }
 
-// // ! this function will be designed later (it buggy func)
-// void	bufferQueuing::extractSize(void)
-// {
-// 	size_t		start;
-// 	int			size;
-// 	std::string	s;
-
-// 	// ! if there is no CRLF return (-1) or throw something... (handle it that the matter)
-// 	while (buffer_queue.at(start) != '\r')
-// 	{
-// 		s += buffer_queue[start];
-// 		start++;
-// 	}
-// 	size = Helpers::hexaToInteger(s);
-// }
-
 size_t	bufferQueuing::extractSize(void)
 {
 	size_t	i = start;
@@ -115,7 +99,7 @@ void	bufferQueuing::processAndShiftData(void)
 	// std::cout << "\e[1;32mSize: \e[0m" << size << std::endl;
 	if (size == 0){
 		last_chunk = true;
-		return ;
+		return ; 
 	}
 	if ((buffer_queue.size() - start - 2 < size)) // ! if not possible to extract the size
 		return ; // * POP
