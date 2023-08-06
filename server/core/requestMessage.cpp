@@ -92,6 +92,21 @@ void	requestMessage::setProperVS(void)
 
 
 
+// TODO :: REQUEST HANDLING {READING, PARSING, BODY..}
+
+// ************* BODY HANDLING **************
+void	requestMessage::openAndWrite(const char* data, size_t size, bool creation_flag)
+{
+	if (creation_flag)
+	{
+		body_fd = open((std::string("post/") + Helpers::randomFileNameGen()).c_str(), O_WRONLY | O_CREAT, 0666);
+		if (body_fd == -1)
+			throw (INTERNAL_SERVER_ERROR);
+	}
+	if (write(body_fd, data, size) == -1) // ! what the fuck 30ms of diffrence
+		throw (INTERNAL_SERVER_ERROR);
+}
+
 void	requestMessage::chunked_approach(const char *buffer, int bytes, bool creation_flag)
 {
 	TE_reader.bufferFeed(buffer, bytes);
@@ -121,7 +136,31 @@ void	requestMessage::extractBodyContent(char *buffer, int bytes)
 	_req_body.clear(); // ! clear the body that is written on the file
 }
 
-// TODO :: REQUEST HANDLING {READING, PARSING..}
+void	requestMessage::handleBodyRead(void)
+{
+	if (_chunked)
+	{
+		// ? set state to reading body, but maybe change in case we found last chunk
+		handling_state = READING_BODY_REQ;
+		chunked_approach((const char*)_req_body.data(), _req_body.size(), true);
+		_req_body.clear();
+		return ;
+	}
+	if (_content_len >= _vs->getMaxBodySize())
+		throw (REQUEST_ENTITY_TOO_LARGE);
+	openAndWrite((const char*)_req_body.data(), _req_body.size(), true);
+	_content_len -= _req_body.size();
+	handling_state = (!_content_len ? DONE_REQ : READING_BODY_REQ);
+	_req_body.clear();
+}
+
+// ***************** END BODY HANDLING *********************
+
+
+
+
+
+// **************** HEADER HANDLING ************************
 void	requestMessage::headerExtracting(char *buffer, int bytes)
 {
 	int			tmp;
@@ -138,25 +177,6 @@ void	requestMessage::headerExtracting(char *buffer, int bytes)
 			_req_body.push_back(_req_message[i + (_req_header.length() + 2)]);
 		handling_state = PARSING_REQ;
 	}
-}
-
-void	requestMessage::readReqMsg(int client_sock)
-{
-	int			bytes;
-	char		buffer[BUFFER_MSG + 1] = {0};
-
-	bytes = read(client_sock, buffer, BUFFER_MSG);
-	if (bytes == -1)
-		throw (INTERNAL_SERVER_ERROR);
-	if (bytes == 0)
-		throw (ZERO_READED);
-	buffer[bytes] = 0;
-	if (handling_state == READING_BODY_REQ)
-	{
-		extractBodyContent(buffer, bytes);
-		return ;
-	}
-	headerExtracting(buffer, bytes);
 }
 
 size_t	requestMessage::request_line(void)
@@ -217,6 +237,9 @@ void	requestMessage::headerParsing(void)
 		throw (BAD_REQUEST);
 }
 
+// **************** END HEADER HANDLING ************************
+
+
 void	requestMessage::print_body()
 {
 	std::cout << "Body Readed in header reading: " << _req_body.size() << std::endl;
@@ -225,34 +248,23 @@ void	requestMessage::print_body()
 	std::cout << "**************************************************" << std::endl;
 }
 
-void	requestMessage::openAndWrite(const char* data, size_t size, bool creation_flag)
+void	requestMessage::readReqMsg(int client_sock)
 {
-	if (creation_flag)
-	{
-		body_fd = open("file.ext", O_WRONLY | O_CREAT, 0666);
-		if (body_fd == -1)
-			throw (INTERNAL_SERVER_ERROR);
-	}
-	if (write(body_fd, data, size) == -1) // ! what the fuck 30ms of diffrence
-		throw (INTERNAL_SERVER_ERROR);
-}
+	int			bytes;
+	char		buffer[BUFFER_MSG + 1] = {0};
 
-void	requestMessage::handleBodyRead(void)
-{
-	if (_chunked)
+	bytes = read(client_sock, buffer, BUFFER_MSG);
+	if (bytes == -1)
+		throw (INTERNAL_SERVER_ERROR);
+	if (bytes == 0)
+		throw (ZERO_READED);
+	buffer[bytes] = 0;
+	if (handling_state == READING_BODY_REQ)
 	{
-		// ? set state to reading body, but maybe change in case we found last chunk
-		handling_state = READING_BODY_REQ;
-		chunked_approach((const char*)_req_body.data(), _req_body.size(), true);
-		_req_body.clear();
+		extractBodyContent(buffer, bytes);
 		return ;
 	}
-	if (_content_len >= _vs->getMaxBodySize())
-		throw (REQUEST_ENTITY_TOO_LARGE);
-	openAndWrite((const char*)_req_body.data(), _req_body.size(), true);
-	_content_len -= _req_body.size();
-	handling_state = (!_content_len ? DONE_REQ : READING_BODY_REQ);
-	_req_body.clear();
+	headerExtracting(buffer, bytes);
 }
 
 // ! read body
@@ -262,7 +274,7 @@ void	requestMessage::requestHandling(int client_sock)
 		readReqMsg(client_sock);
 	if (handling_state == PARSING_REQ)
 	{
-		print_body();
+		// print_body();
 		std::cout << _req_header << std::endl;
 		std::cout << "client fd: " << client_sock << std::endl;
 		headerParsing();

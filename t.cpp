@@ -33,9 +33,29 @@ unsigned int	hexaToInteger(const std::string& hex)
 	return (result);
 }
 
+std::string	randomFileNameGen(void)
+{
+	std::string	alphanums = "_";
+	std::string	file_name;
+
+	std::srand(time(NULL));
+	for (size_t i = 0; i < 26; ++i)
+	{
+		if (i <= 9)
+			alphanums += (i + 48);
+		alphanums += (i + 97);
+		alphanums += (i + 65);
+	}
+	// ! BASE = 26 + 26 + 10 + 1 = 63
+	for (size_t i = 0; i < 15; i++)
+		file_name += alphanums[rand() % 63];
+	return (file_name);
+}
+
 int main(void)
 {
-	std::cout << hexaToInteger("10") << std::endl;
+	// std::cout << hexaToInteger("10") << std::endl;
+	std::cout << randomFileNameGen() << std::endl;
 	return (0);
 
 }

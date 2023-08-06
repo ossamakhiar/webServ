@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 17:16:08 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 12:22:43 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 15:50:00 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void	bufferQueuing::processAndShiftData(void)
 			return ;
 		}
 	}
-	std::cout << "\e[1;32mSize: \e[0m" << size << std::endl;
+	// std::cout << "\e[1;32mSize: \e[0m" << size << std::endl;
 	if (size == 0){
 		last_chunk = true;
 		return ;
