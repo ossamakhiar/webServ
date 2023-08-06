@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include "helpers.hpp"
 #include "virtualServer.hpp"
+#include "bufferQueuing.hpp"
 
 # define BUFFER_MSG 400
 # define MAX_REQ_URI 8192
@@ -34,6 +35,7 @@ enum e_status_code
 {
 	OK = 200,
 	BAD_REQUEST = 400,
+	REQUEST_ENTITY_TOO_LARGE = 413,
 	REQUEST_URI_TOO_LONG = 414,
 	INTERNAL_SERVER_ERROR = 500,
 	METHOD_NOT_IMPLEMENTED = 501,
@@ -46,7 +48,8 @@ enum e_status_code
 class requestMessage
 {
 private:
-	// int							readed_body;
+	int body_fd; // ? file exist in case of POST body
+
 	int							handling_state;
 	std::string					_req_message; // ** store the request message
 	std::string					_req_header;
@@ -55,16 +58,17 @@ private:
 	// ? To define the server that client want to interact with.
 	std::vector<virtualServer*> &_vs_endpoint;
 	virtualServer		*&_vs;
-	// **************
+	// ? ******************************
+
+	bool			_chunked;// ? transfer encoding body content case
+	bufferQueuing	TE_reader;
 
 	std::map<std::string, std::string> _header_fields;
 
 	bool		_presistent_con;
 	int			_content_len; // ! mandatory in case request has a body message
 	std::string	_hostname; // ! make it mandatory :)
-	std::string	_method;
-	std::string	_URI;
-	std::string	_http_version;
+	std::string	_method, _URI, _http_version;
 
 
 	// ** private members function
@@ -73,12 +77,16 @@ private:
 	void	headerParsing(void);
 	void	headerExtracting(char *, int);
 
-	void	openAndWrite(bool c = false);
-	void	isBodyComplete(void);
+	void	openAndWrite(const char* data, size_t size, bool creation_flag = false);
+	// void	isBodyComplete(void);
+
+	void	chunked_approach(const char *buffer, int bytes, bool c = false);
 	void	extractBodyContent(char *buffer, int bytes);
+	void	handleBodyRead(void);
 
 	requestMessage(const requestMessage&);
 	requestMessage& operator=(const requestMessage&);
+
 public:
 	requestMessage(std::vector<virtualServer*>&, virtualServer *&);
 	~requestMessage();
@@ -93,10 +101,8 @@ public:
 	void	setProperVS(void);
 	void	setImportantFields(void);
 
-
 	// * Getters
 	int	getReqState(void) const;
-
 
 	void	requestHandling(int client_sock);
 

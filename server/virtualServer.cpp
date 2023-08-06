@@ -6,13 +6,13 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:52:23 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/04 15:03:03 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/05 15:19:53 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "virtualServer.hpp"
 
-virtualServer::virtualServer() : max_client_body_size(500000)
+virtualServer::virtualServer() : max_client_body_size(1048576) // * 1MB
 {
 	endpoint.first = "";
 	endpoint.second = -1;
@@ -64,6 +64,11 @@ const std::pair<std::string, int>& virtualServer::getEndpoint() const
 const std::string&	virtualServer::getRootDir(void) const
 {
 	return (root);
+}
+
+int					virtualServer::getMaxBodySize(void) const
+{
+	return (max_client_body_size);
 }
 
 // TODO :: Setters

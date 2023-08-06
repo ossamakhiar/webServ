@@ -14,6 +14,7 @@
 
 requestMessage::requestMessage(std::vector<virtualServer*> &ends_v, virtualServer *&vs) : _vs_endpoint(ends_v), \
 		_vs(vs), \
+		_chunked(false),
 		_presistent_con(true), \
 		_content_len(0)
 {
@@ -90,17 +91,37 @@ void	requestMessage::setProperVS(void)
 
 
 
+
+void	requestMessage::chunked_approach(const char *buffer, int bytes, bool creation_flag)
+{
+	TE_reader.bufferFeed(buffer, bytes);
+	TE_reader.processAndShiftData();
+	// ! getbuffer should return all the chunks that is full...
+	openAndWrite((const char *)TE_reader.getChunks(), TE_reader.chunk_size(), creation_flag);
+	// ? I'm Stuck here....
+	TE_reader.clear_data();
+	if (TE_reader.isLastChunk())
+		handling_state = DONE_REQ;
+}
+
 void	requestMessage::extractBodyContent(char *buffer, int bytes)
 {
+	if (_chunked)
+	{
+		// ? transfer encoding chunked..
+		chunked_approach(buffer, bytes);
+		return ;
+	}
+	// ? Store-and-forward approach
+	// ! why i store it in a container why just write it
 	for (size_t i = 0; i < static_cast<size_t>(bytes) && _content_len > 0; ++i, --_content_len)
 		_req_body.push_back(buffer[i]);
 	handling_state = ((!_content_len) ? DONE_REQ : handling_state);
-	openAndWrite();
+	openAndWrite((const char*)_req_body.data(), _req_body.size());
 	_req_body.clear(); // ! clear the body that is written on the file
 }
 
 // TODO :: REQUEST HANDLING {READING, PARSING..}
-
 void	requestMessage::headerExtracting(char *buffer, int bytes)
 {
 	int			tmp;
@@ -124,13 +145,11 @@ void	requestMessage::readReqMsg(int client_sock)
 	int			bytes;
 	char		buffer[BUFFER_MSG + 1] = {0};
 
-	std::cout << "Reading......." << std::endl;
 	bytes = read(client_sock, buffer, BUFFER_MSG);
 	if (bytes == -1)
 		throw (INTERNAL_SERVER_ERROR);
 	if (bytes == 0)
 		throw (ZERO_READED);
-	// ! extract Body if header parsing finished...
 	buffer[bytes] = 0;
 	if (handling_state == READING_BODY_REQ)
 	{
@@ -160,8 +179,18 @@ void	requestMessage::setImportantFields(void)
 {
 	if (_header_fields.count("Connection"))
 		setConnectionType(_header_fields["Connection"]);
+	if (_header_fields.count("Transfer-Encoding"))
+	{
+		if (_header_fields["Transfer-Encoding"] != "chunked")
+			throw (METHOD_NOT_IMPLEMENTED);
+		_chunked = true;
+	}
 	if (_header_fields.count("Content-Length"))
+	{
+		if (_chunked)
+			throw (BAD_REQUEST);
 		setContentLen(_header_fields["Content-Length"]);
+	}
 	if (!_header_fields.count("Host"))
 		throw (BAD_REQUEST);
 	_hostname = _header_fields["Host"];
@@ -183,9 +212,8 @@ void	requestMessage::headerParsing(void)
 		_header_fields[field_key] = field_value;
 		i = pos + 2;
 	}
-	setImportantFields();
-	setProperVS();
-	if (_method == "POST" && !_header_fields.count("Content-Length"))
+	(setImportantFields(), setProperVS());
+	if (_method == "POST" && !_header_fields.count("Content-Length") && !_header_fields.count("Transfer-Encoding"))
 		throw (BAD_REQUEST);
 }
 
@@ -197,29 +225,33 @@ void	requestMessage::print_body()
 	std::cout << "**************************************************" << std::endl;
 }
 
-void	requestMessage::openAndWrite(bool creation_flag)
+void	requestMessage::openAndWrite(const char* data, size_t size, bool creation_flag)
 {
-	int	fd;
-
-	// if (_req_body.size() == 0)
-	// 	return ;
-	fd = (creation_flag ? open("file.ext", O_WRONLY | O_CREAT, 0666) : open("file.ext", O_APPEND | O_WRONLY));
-	if (fd == -1)
-		throw (INTERNAL_SERVER_ERROR);
-	for (std::vector<unsigned char>::iterator it = _req_body.begin(); it != _req_body.end(); ++it)
-		if (write(fd, &(*it), 1) == -1)
+	if (creation_flag)
+	{
+		body_fd = open("file.ext", O_WRONLY | O_CREAT, 0666);
+		if (body_fd == -1)
 			throw (INTERNAL_SERVER_ERROR);
-	close(fd);
+	}
+	if (write(body_fd, data, size) == -1) // ! what the fuck 30ms of diffrence
+		throw (INTERNAL_SERVER_ERROR);
 }
 
-void	requestMessage::isBodyComplete(void)
+void	requestMessage::handleBodyRead(void)
 {
-	openAndWrite(true); // ! Write the body on a file
-	_content_len -= _req_body.size(); // * subtract the readed bytes from the content length
-	if (!_content_len) // ! this check maybe the right position in body extracting
-		handling_state = DONE_REQ;
-	else
+	if (_chunked)
+	{
+		// ? set state to reading body, but maybe change in case we found last chunk
 		handling_state = READING_BODY_REQ;
+		chunked_approach((const char*)_req_body.data(), _req_body.size(), true);
+		_req_body.clear();
+		return ;
+	}
+	if (_content_len >= _vs->getMaxBodySize())
+		throw (REQUEST_ENTITY_TOO_LARGE);
+	openAndWrite((const char*)_req_body.data(), _req_body.size(), true);
+	_content_len -= _req_body.size();
+	handling_state = (!_content_len ? DONE_REQ : READING_BODY_REQ);
 	_req_body.clear();
 }
 
@@ -238,8 +270,10 @@ void	requestMessage::requestHandling(int client_sock)
 		// ** Check if the method that is the request used is POST then continue reading the body
 		handling_state = DONE_REQ;
 		if (_method == "POST")
-			isBodyComplete();
+			handleBodyRead(); // ? handling body that read during header reading
 	}
+	if (handling_state == DONE_REQ)
+		close(body_fd);
 }
 
 
