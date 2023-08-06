@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 18:22:56 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 18:39:36 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,14 +56,22 @@ bool	ftString::operator==(const ftString& rhs) const
 	size_t	i = 0;
 
 	while (i < _size && i < rhs._size)
+	{
 		if (_str[i] != rhs._str[i])
 			return (false);
+		i++;
+	}
 	return (i >= _size && i >= rhs._size);
 }
 
 bool	ftString::operator!=(const ftString& rhs) const
 {
 	return (!(*this == rhs));
+}
+
+ftString&	ftString::operator+=(const ftString& rhs)
+{
+	return (this->append(rhs));
 }
 
 char&	ftString::operator[](size_t pos) const
@@ -103,7 +111,7 @@ ftString&	ftString::append(const ftString& other)
 
 	tmp = new char[other._size + _size + 1];
 	memcpy(tmp, _str, _size);
-	memcpy(tmp + _size, other._str, other._size);
+	memcpy(tmp + _size, other._str, other._size + 1);
 	delete[] _str;
 	_str = tmp;
 	_size += other._size;

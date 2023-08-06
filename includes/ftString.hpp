@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:28:57 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 17:55:48 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/06 18:38:39 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ public:
 	bool	operator==(const ftString&) const;
 	bool	operator!=(const ftString&) const;
 	char&	operator[](size_t pos) const;
+
+	ftString&	operator+=(const ftString& rhs);
 };
 
 std::ostream& operator<<(std::ostream &os, const ftString& str);
