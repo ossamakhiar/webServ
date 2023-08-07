@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:28:57 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 19:35:09 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/07 15:57:19 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,10 @@ public:
 	const char*	c_str(void) const;
 
 	ftString&	append(const ftString&);
+	ftString&	append(const char* str, size_t len);
 	ftString	substr(size_t pos, size_t len = npos);
 	size_t		size(void) const;
+	void		clear(void);
 
 	size_t		find(const char* str, size_t pos = 0) const;
 

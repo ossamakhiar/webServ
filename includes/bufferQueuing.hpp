@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 15:53:22 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 12:04:27 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/07 16:00:03 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define BUFFERQUEUING_HPP
 
 #include "helpers.hpp"
+#include "ftString.hpp"
 
 
 class bufferQueuing
@@ -22,8 +23,11 @@ private:
 	bool						size_extracted;
 	size_t						start;
 	size_t						size;
-	std::vector<unsigned char>	buffer_queue;
-	std::vector<unsigned char>	data;
+
+	ftString	buffer_queue;
+	ftString	data;
+	//std::vector<unsigned char>	buffer_queue;
+	//std::vector<unsigned char>	data;
 
 	bool						last_chunk;
 
@@ -43,7 +47,7 @@ public:
 	void	clear_data(void);
 
 
-	const unsigned char*	getChunks() const;
+	const char*	getChunks() const;
 	size_t					chunk_size() const;
 	bool					isLastChunk() const;
 };

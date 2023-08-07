@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 19:37:13 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/07 15:58:37 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,17 @@ ftString::ftString(const char* str)
 {
 	size_t i;
 	size_t	len = strlen(str);
+
+	_size = len;
+	_str = new char[len + 1];
+	for (i = 0; i < len; i++)
+		_str[i] = str[i];
+	_str[i] = 0;
+}
+
+ftString::ftString(const char* str, size_t len)
+{
+	size_t i;
 
 	_size = len;
 	_str = new char[len + 1];
@@ -118,6 +129,19 @@ ftString&	ftString::append(const ftString& other)
 	return (*this);
 }
 
+ftString&	ftString::append(const char* str, size_t len)
+{
+	char	*tmp;
+
+	tmp = new char[_size + len + 1];
+	memcpy(tmp, _str, _size);
+	memcpy(tmp + _size, str, len + 1);
+	delete[] _str;
+	_str = tmp;
+	_size += len;
+	return (*this);
+}
+
 // ? this substr version does not check for \0
 ftString	ftString::substr(size_t pos, size_t len)
 {
@@ -159,6 +183,13 @@ size_t		ftString::find(const char* str, size_t pos) const
 }
 
 
+void	ftString::clear(void)
+{
+	_size = 0;
+	delete[] _str;
+	_str = new char[1];
+	*_str = 0;
+}
 
 
 std::ostream& operator<<(std::ostream &os, const ftString& str)
