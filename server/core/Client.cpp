@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/05 11:38:40 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/07 12:19:29 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ void	Client::readRequest()
 			std::cout << _request << std::endl;
 		}
 	} catch (e_status_code code) {
+		// ! you should close the file descriptor of the post body
 		_status_code = code;
 		client_state = BUILD_RESPONSE;
 		std::cout << "ERROR THROWED: " << code << std::endl;
