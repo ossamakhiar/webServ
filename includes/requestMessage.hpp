@@ -50,10 +50,10 @@ class requestMessage
 private:
 	int body_fd; // ? file exist in case of POST body
 
-	int							handling_state;
-	std::string					_req_message; // ** store the request message
-	std::string					_req_header;
-	std::vector<unsigned char>	_req_body;
+	int					handling_state;
+	std::string			_req_message; // ** store the request message
+	std::string			_req_header;
+	std::vector<char>	_req_body;
 
 	// ? To define the server that client want to interact with.
 	std::vector<virtualServer*> &_vs_endpoint;

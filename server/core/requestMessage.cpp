@@ -114,7 +114,7 @@ void	requestMessage::chunked_approach(const char *buffer, int bytes, bool creati
 	TE_reader.bufferFeed(buffer, bytes);
 	TE_reader.processAndShiftData();
 	// ! getbuffer should return all the chunks that is full...
-	openAndWrite((const char *)TE_reader.getChunks(), TE_reader.chunk_size(), creation_flag);
+	openAndWrite(TE_reader.getChunks(), TE_reader.chunk_size(), creation_flag);
 	// ? I'm Stuck here....
 	TE_reader.clear_data();
 	if (TE_reader.isLastChunk())
@@ -134,7 +134,7 @@ void	requestMessage::extractBodyContent(char *buffer, int bytes)
 	for (size_t i = 0; i < static_cast<size_t>(bytes) && _content_len > 0; ++i, --_content_len)
 		_req_body.push_back(buffer[i]);
 	handling_state = ((!_content_len) ? DONE_REQ : handling_state);
-	openAndWrite((const char*)_req_body.data(), _req_body.size());
+	openAndWrite(&_req_body[0], _req_body.size());
 	_req_body.clear(); // ! clear the body that is written on the file
 }
 
@@ -144,13 +144,13 @@ void	requestMessage::handleBodyRead(void)
 	{
 		// ? set state to reading body, but maybe change in case we found last chunk
 		handling_state = READING_BODY_REQ;
-		chunked_approach((const char*)_req_body.data(), _req_body.size(), true);
+		chunked_approach(&_req_body[0], _req_body.size(), true);
 		_req_body.clear();
 		return ;
 	}
 	if (_content_len >= _vs->getMaxBodySize())
 		throw (REQUEST_ENTITY_TOO_LARGE);
-	openAndWrite((const char*)_req_body.data(), _req_body.size(), true);
+	openAndWrite(&_req_body[0], _req_body.size(), true);
 	_content_len -= _req_body.size();
 	handling_state = (!_content_len ? DONE_REQ : READING_BODY_REQ);
 	_req_body.clear();

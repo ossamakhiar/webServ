@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 17:16:08 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/07 16:10:35 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/07 16:48:05 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ bufferQueuing&	bufferQueuing::operator=(const bufferQueuing& rhs)
 // * Getter
 const char*	bufferQueuing::getChunks(void) const
 {
-	return (data.c_str());
+	return (&data[0]);
 }
 
 size_t	bufferQueuing::chunk_size(void) const
@@ -63,59 +63,11 @@ void	bufferQueuing::clear_data(void)
 
 void	bufferQueuing::bufferFeed(const char *buffer, int bytes)
 {
-	buffer_queue.append(buffer, bytes);
 	// std::cout << buffer << std::endl;
-	// for (size_t i = 0; i < static_cast<size_t>(bytes); ++i)
-	// 	buffer_queue.push_back(buffer[i]);
+	for (size_t i = 0; i < static_cast<size_t>(bytes); ++i)
+		buffer_queue.push_back(buffer[i]);
 }
 
-// void	bufferQueuing::bufferFeed(const char *buffer, int bytes)
-// {
-// 	// std::cout << buffer << std::endl;
-// 	for (size_t i = 0; i < static_cast<size_t>(bytes); ++i)
-// 		buffer_queue.push_back(buffer[i]);
-// }
-
-size_t	bufferQueuing::extractSize(void)
-{
-	size_t		pos;
-	ftString	hexa;
-
-	pos = buffer_queue.find("\r\n", start);
-	if (pos == ftString::npos)
-		throw (1);
-	hexa = buffer_queue.substr(start, pos - start);
-	start += (pos - start) + 2;
-	size_extracted = true;
-	return (Helpers::hexaToInteger(hexa.c_str()));
-}
-
-void	bufferQueuing::processAndShiftData(void)
-{
-	// size_t	i = 0;
-
-	if (!size_extracted)
-	{
-		try {
-			size = extractSize();
-		} catch (...){
-			return ;
-		}
-	}
-	if (size == 0)
-	{
-		last_chunk = true;
-		return ;
-	}
-	if (buffer_queue.size() - start < size + 2) // ! size + 2 to include CRLF also
-		return ;
-	data = buffer_queue.substr(start, size);
-	start += size + 2;
-	size_extracted = false;
-	processAndShiftData();
-}
-
-/*
 size_t	bufferQueuing::extractSize(void)
 {
 	size_t	i = start;
@@ -158,10 +110,10 @@ void	bufferQueuing::processAndShiftData(void)
 	{
 		data.push_back(buffer_queue[start + i]);
 		i++;
+		// * push back to return buffer (user buffer)
 	}
 	// * idea : clear from 0 to the size that read
 	start += size + 2;
 	size_extracted = false;
 	processAndShiftData();
 }
-*/
