@@ -87,6 +87,7 @@ private:
 	void	extractBodyContent(char *buffer, int bytes);
 	void	handleBodyRead(void);
 
+	std::string	pathExtracting(void);
 	std::string	fragmentExtracting(void);
 	std::string	queryExtracting(void);
 

@@ -42,6 +42,17 @@ std::string	requestMessage::getURI(void) const
 
 
 // TODO :: Setters
+std::string	requestMessage::pathExtracting(void)
+{
+	//** 	The path is terminated
+	//**    by the first question mark ("?") or number sign ("#") character, or
+	//**    by the end of the URI.
+	size_t	pos = std::min(_URI.find("?"), _URI.find("#"));
+
+	pos = std::min(pos, _URI.length());
+	return (_URI.substr(0, pos));
+}
+
 std::string	requestMessage::queryExtracting(void)
 {
 	return ("");
