@@ -55,9 +55,13 @@ private:
 	std::string			_req_header;
 	std::vector<char>	_req_body;
 
+	std::string	_path, _query, _fragment;
+
+
 	// ? To define the server that client want to interact with.
 	std::vector<virtualServer*> &_vs_endpoint;
 	virtualServer		*&_vs;
+	locationBlock		*&_location;
 	// ? ******************************
 
 	bool			_chunked;// ? transfer encoding body content case
@@ -68,7 +72,7 @@ private:
 	bool		_presistent_con;
 	int			_content_len; // ! mandatory in case request has a body message
 	std::string	_hostname; // ! make it mandatory :)
-	std::string	_method, _URI, _http_version;
+	std::string	_method, _URI;
 
 
 	// ** private members function
@@ -78,17 +82,23 @@ private:
 	void	headerExtracting(char *, int);
 
 	void	openAndWrite(const char* data, size_t size, bool creation_flag = false);
-	// void	isBodyComplete(void);
 
 	void	chunked_approach(const char *buffer, int bytes, bool c = false);
 	void	extractBodyContent(char *buffer, int bytes);
 	void	handleBodyRead(void);
 
+	std::string	fragmentExtracting(void);
+	std::string	queryExtracting(void);
+
+	// * location setter
+	unsigned int	isPathMatch(std::string, std::string);
+	std::string		locationMatch(const std::map<std::string, locationBlock>& locs);
+
 	requestMessage(const requestMessage&);
 	requestMessage& operator=(const requestMessage&);
 
 public:
-	requestMessage(std::vector<virtualServer*>&, virtualServer *&);
+	requestMessage(std::vector<virtualServer*>&, virtualServer *&, locationBlock *&);
 	~requestMessage();
 
 	// * Setters
@@ -98,11 +108,14 @@ public:
 	void	setConnectionType(const std::string&);
 	void	setContentLen(const std::string&);
 
+	// ! set these to private
 	void	setProperVS(void);
+	void	setLocation(void);
 	void	setImportantFields(void);
 
 	// * Getters
-	int	getReqState(void) const;
+	int			getReqState(void) const;
+	std::string	getURI(void) const;
 
 	void	requestHandling(int client_sock);
 

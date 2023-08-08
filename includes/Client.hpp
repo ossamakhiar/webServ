@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:42:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/04 14:48:06 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/08 16:55:44 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ private:
 
 	std::vector<virtualServer*>	&_vs_endpoint;
 	virtualServer		*_vs;// ** vServer That client communicate to
+	locationBlock		*_location;
+	std::string			_path;
 
 	requestMessage		_request;
 	e_status_code		_status_code;

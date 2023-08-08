@@ -12,9 +12,12 @@
 
 #include "requestMessage.hpp"
 
-requestMessage::requestMessage(std::vector<virtualServer*> &ends_v, virtualServer *&vs) : _vs_endpoint(ends_v), \
+requestMessage::requestMessage(std::vector<virtualServer*> &ends_v, virtualServer *&vs, locationBlock *&loc) \
+		: body_fd(-1), \
+		_vs_endpoint(ends_v), \
 		_vs(vs), \
-		_chunked(false),
+		_location(loc), \
+		_chunked(false), \
 		_presistent_con(true), \
 		_content_len(0)
 {
@@ -32,12 +35,28 @@ int	requestMessage::getReqState(void) const
 	return (handling_state);
 }
 
+std::string	requestMessage::getURI(void) const
+{
+	return (_URI);
+}
+
 
 // TODO :: Setters
+std::string	requestMessage::queryExtracting(void)
+{
+	return ("");
+}
+
+std::string	requestMessage::fragmentExtracting()
+{
+	return ("");
+}
+
 void	requestMessage::setReqURI(const std::string& uri)
 {
 	size_t	i = 0;
 
+	std::cout << "\e[1;35mURI: " << uri << std::endl;
 	while (i < uri.length())
 	{
 		if (uri[i] != '%')
@@ -49,6 +68,8 @@ void	requestMessage::setReqURI(const std::string& uri)
 		_URI += Helpers::hexaToDecimal(Helpers::strTolower(uri.substr(i, 2)));
 		i += 2;
 	}
+	_fragment = fragmentExtracting();
+	_query = queryExtracting();
 }
 
 void	requestMessage::setMethod(const std::string& method)
@@ -58,12 +79,12 @@ void	requestMessage::setMethod(const std::string& method)
 	_method = method;
 }
 
-void	requestMessage::setHttpVersion(const std::string& version)
-{
-	if (version != "HTTP/1.1")
-		throw (HTTP_VERSION_NOT_SUPPORTED);
-	_http_version = version;
-}
+// void	requestMessage::setHttpVersion(const std::string& version)
+// {
+// 	if (version != "HTTP/1.1")
+// 		throw (HTTP_VERSION_NOT_SUPPORTED);
+// 	_http_version = version;
+// }
 
 void	requestMessage::setConnectionType(const std::string& type)
 {
@@ -89,7 +110,46 @@ void	requestMessage::setProperVS(void)
 			_vs = (*it);
 }
 
+unsigned int	requestMessage::isPathMatch(std::string pattern, std::string path)
+{
+	size_t	i = 0;
 
+	if (pattern.length() > path.length()) // * location path = "/hello/world" & path = "/hello"
+		return (0);
+	while (i < pattern.length())
+	{
+		if (pattern[i] != path[i])
+			return (0);
+		i++;
+	}
+	if (pattern != "/" && path[i] && path[i] != '/')
+		return (0);
+	return	(pattern.length());
+}
+
+std::string	requestMessage::locationMatch(const std::map<std::string, locationBlock>& locs)
+{
+	std::map<unsigned int, std::string>	matches;
+	unsigned int	len;
+
+	for (std::map<std::string, locationBlock>::const_iterator it = locs.begin(); it != locs.end(); ++it)
+		if ((len = isPathMatch(it->first, _URI)))
+			matches[len] = it->first;
+	if (matches.size() == 0)
+		return ("");
+	return (matches.rbegin()->second);
+}
+
+void	requestMessage::setLocation(void)
+{
+	std::map<std::string, locationBlock>&	locs = _vs->getLocations();
+	std::string	path;
+
+	path = locationMatch(locs);
+	if (path.empty())
+		return ;
+	_location = &(locs[path]);
+}
 
 
 // TODO :: REQUEST HANDLING {READING, PARSING, BODY..}
@@ -103,14 +163,14 @@ void	requestMessage::openAndWrite(const char* data, size_t size, bool creation_f
 		if (body_fd == -1)
 			throw (INTERNAL_SERVER_ERROR);
 	}
-	if (write(body_fd, data, size) == -1) // ! what the fuck 30ms of diffrence
+	if (write(body_fd, data, size) == -1)
 		throw (INTERNAL_SERVER_ERROR);
 }
 
 void	requestMessage::chunked_approach(const char *buffer, int bytes, bool creation_flag)
 {
-	if (creation_flag)
-		std::cout << "handling in chuncked approach...\n";
+	// if (creation_flag)
+	// 	std::cout << "handling in chuncked approach...\n";
 	TE_reader.bufferFeed(buffer, bytes);
 	TE_reader.processAndShiftData();
 	// ! getbuffer should return all the chunks that is full...
@@ -131,11 +191,13 @@ void	requestMessage::extractBodyContent(char *buffer, int bytes)
 	}
 	// ? Store-and-forward approach
 	// ! why i store it in a container why just write it
-	for (size_t i = 0; i < static_cast<size_t>(bytes) && _content_len > 0; ++i, --_content_len)
-		_req_body.push_back(buffer[i]);
+	// ! now i'm just read, what if the bytes that i read more than the content len?
+	// for (size_t i = 0; i < static_cast<size_t>(bytes) && _content_len > 0; ++i, --_content_len)
+	// 	_req_body.push_back(buffer[i]);
+	_content_len -= bytes;
 	handling_state = ((!_content_len) ? DONE_REQ : handling_state);
-	openAndWrite(&_req_body[0], _req_body.size());
-	_req_body.clear(); // ! clear the body that is written on the file
+	openAndWrite(buffer, bytes);
+	// _req_body.clear(); // ! clear the body that is written on the file
 }
 
 void	requestMessage::handleBodyRead(void)
@@ -193,7 +255,9 @@ size_t	requestMessage::request_line(void)
 	if (tokens[1].length() > MAX_REQ_URI)
 		throw (REQUEST_URI_TOO_LONG);
 	setReqURI(tokens[1]);
-	setHttpVersion(tokens[2]);
+	// setHttpVersion(tokens[2]);
+	if (tokens[2] != "HTTP/1.1")
+		throw (HTTP_VERSION_NOT_SUPPORTED);
 	return (pos + 2);
 }
 
@@ -234,7 +298,7 @@ void	requestMessage::headerParsing(void)
 		_header_fields[field_key] = field_value;
 		i = pos + 2;
 	}
-	(setImportantFields(), setProperVS());
+	(setImportantFields(), setProperVS(), setLocation());
 	if (_method == "POST" && !_header_fields.count("Content-Length") && !_header_fields.count("Transfer-Encoding"))
 		throw (BAD_REQUEST);
 }
@@ -253,7 +317,7 @@ void	requestMessage::print_body()
 void	requestMessage::readReqMsg(int client_sock)
 {
 	int			bytes;
-	char		buffer[BUFFER_MSG + 1] = {0};
+	char		buffer[BUFFER_MSG + 1];
 
 	bytes = read(client_sock, buffer, BUFFER_MSG);
 	if (bytes == -1)
@@ -286,7 +350,8 @@ void	requestMessage::requestHandling(int client_sock)
 		if (_method == "POST")
 			handleBodyRead(); // ? handling body that read during header reading
 	}
-	if (handling_state == DONE_REQ)
+	std::cout << "\e[1;31mbody_fd: \e[0m" << body_fd << std::endl;
+	if (handling_state == DONE_REQ && _method == "POST") // ! are you crazy what if the method is GET there is no body fd
 		close(body_fd);
 }
 
@@ -304,7 +369,7 @@ std::ostream&	operator<<(std::ostream& os, const requestMessage& req)
 	os << "\e[1;34mRequest:\e[0m\n";
 	os << "Method: " << req._method <<std::endl;
 	os << "URI: " << req._URI << std::endl;
-	os << "HTTP Version: " << req._http_version << std::endl;
+	// os << "HTTP Version: " << req._http_version << std::endl;
 	os << "Persistent Connection: " << std::boolalpha << req._presistent_con << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = req._header_fields.begin(); it != req._header_fields.end(); ++it)
 		std::cout << it->first << ": " << it->second << std::endl;

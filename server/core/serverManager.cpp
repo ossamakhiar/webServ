@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/04 18:02:56 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/08 17:30:09 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,7 @@ void	serverManager::acceptNewConnection(void)
 		if (!FD_ISSET(it->first, &pre_read_fds))
 			continue ;
 		newsock = accept(it->first, (struct sockaddr*)&addr, &len);
+		std::cout << "newsock: " << newsock << std::endl;
 		fcntl(newsock, F_SETFL, O_NONBLOCK); // ! NONBLOCKING IO MODE
 		// ! fctnl()
 		if (newsock >= 1024) // * the highest fd number
@@ -195,7 +196,10 @@ void	serverManager::IOSynchronous(void)
 		FD_COPY(&read_fds, &pre_read_fds);
 		FD_COPY(&write_fds, &pre_write_fds);
 		if (select(highest_fd + 1, &pre_read_fds, &pre_write_fds, 0, 0) < 0)
+		{
+			std::cout << "Select failed\n";
 			return ; // ! handle this
+		}
 		// ** check if there a passive socket ready to read from 
 		// ** then := create an active socket that 
 		acceptNewConnection();

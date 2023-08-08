@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 17:16:08 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/07 16:48:05 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/07 18:40:50 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,16 +101,15 @@ void	bufferQueuing::processAndShiftData(void)
 	}
 	if (size == 0){
 		last_chunk = true;
-		size_extracted = false;
 		return ; 
 	}
-	if ((buffer_queue.size() - start - 2 < size)) // ! if not possible to extract the the whole chunk
+	if ((buffer_queue.size() - start < size + 2)) // ! if not possible to extract the the whole chunk
 		return ; // * POP
 	while(i < size)
 	{
+		// * push back to return buffer (user buffer)
 		data.push_back(buffer_queue[start + i]);
 		i++;
-		// * push back to return buffer (user buffer)
 	}
 	// * idea : clear from 0 to the size that read
 	start += size + 2;

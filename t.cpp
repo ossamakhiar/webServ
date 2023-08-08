@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "includes/ftString.hpp"
+// #include "includes/ftString.hpp"
 
 int	getDigit(const char& c)
 {
@@ -53,30 +53,30 @@ std::string	randomFileNameGen(void)
 	return (file_name);
 }
 
-void	func()
-{
-	ftString	str = "oussama";
-	ftString	str1 = "oussama khiar f";
+// void	func()
+// {
+// 	ftString	str = "oussama";
+// 	ftString	str1 = "oussama khiar f";
 
-	str1 += "khiaraaaaa";
+// 	str1 += "khiaraaaaa";
 
-	std::cout << "size: " << str.size() << " " << str << std::endl;
-	str.append(" khiar f");
-	std::cout << str << std::endl;
-	std::cout << str.substr(2, ftString::npos) << std::endl;
-	std::cout << str.find("khiar", 9) << std::endl;
-	std::cout << str[8] << std::endl;
-	if (str == str1)
-		std::cout << "Yeeaaaaah\n";
-	if (str != str1)
-		std::cout << "Ooaaaah\n";
-	std::cout << str1 << std::endl;
-}
+// 	std::cout << "size: " << str.size() << " " << str << std::endl;
+// 	str.append(" khiar f");
+// 	std::cout << str << std::endl;
+// 	std::cout << str.substr(2, ftString::npos) << std::endl;
+// 	std::cout << str.find("khiar", 9) << std::endl;
+// 	std::cout << str[8] << std::endl;
+// 	if (str == str1)
+// 		std::cout << "Yeeaaaaah\n";
+// 	if (str != str1)
+// 		std::cout << "Ooaaaah\n";
+// 	std::cout << str1 << std::endl;
+// }
 
 int main(void)
 {
-	func();
-	system("leaks a.out");
+	// func();
+	// system("leaks a.out");
 	return (0);
 
 }

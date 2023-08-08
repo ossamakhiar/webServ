@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 14:43:13 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/05 15:04:44 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/08 17:17:01 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,12 @@ public:
 	void	setRootDir(const std::string&);
 
 	// TODO :: Getters
+	std::map<std::string, locationBlock>& getLocations(void)
+	{
+		return (locations);
+	}
+
+
 	locationBlock&		getLocations(const std::string& key);
 	const std::string&	getPort() const;
 	const std::pair<std::string, int>& getEndpoint() const;

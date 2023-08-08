@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/07 12:19:29 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/08 17:23:00 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 
 Client::Client(int fd, struct sockaddr_in addr, std::vector<virtualServer*>	&ends_vs) : _vs_endpoint(ends_vs), \
 	_vs(NULL),
-	_request(_vs_endpoint, _vs)
+	_location(NULL),
+	_request(_vs_endpoint, _vs, _location)
 {
 	client_state = READING_REQUEST;
 	this->client_socket = fd;
@@ -69,6 +70,9 @@ void	Client::readRequest()
 
 void	Client::makeResponse(void)
 {
+	std::cout << "\e[1;31mLocation: \e[0m" << _request.getURI() << std::endl;
+	if (_location)
+		std::cout << *_location << std::endl;
 	// if (_vs)
 	// 	std::cout << *_vs << std::endl;
 	std::cout << "send request by meeeee\n";
