@@ -40,6 +40,15 @@ std::string	requestMessage::getURI(void) const
 	return (_URI);
 }
 
+const std::string&	requestMessage::getPath() const
+{
+	return (_path);
+}
+
+const std::string&	requestMessage::getQuery() const
+{
+	return (_query);
+}
 
 // TODO :: Setters
 std::string	requestMessage::pathExtracting(void)
@@ -47,39 +56,51 @@ std::string	requestMessage::pathExtracting(void)
 	//** 	The path is terminated
 	//**    by the first question mark ("?") or number sign ("#") character, or
 	//**    by the end of the URI.
-	size_t	pos = std::min(_URI.find("?"), _URI.find("#"));
+	std::string	ret;
+	size_t		pos = std::min(_URI.find("?"), _URI.length());
 
-	pos = std::min(pos, _URI.length());
-	return (_URI.substr(0, pos));
+	// pos = std::min(pos, _URI.length());
+	ret = _URI.substr(0, pos);
+	return (Helpers::precent_decoding(ret));
 }
 
-std::string	requestMessage::queryExtracting(void)
-{
-	return ("");
-}
+// std::string	requestMessage::fragmentExtracting(void)
+// {
+// 	std::string	fragment;
+// 	size_t		pos;
 
-std::string	requestMessage::fragmentExtracting()
+// 	pos = _URI.find("#");
+// 	if (pos == std::string::npos)
+// 		return ("");
+// 	std::cout << "pos: " << pos << std::endl;
+// 	fragment = _URI.substr(pos, _URI.length() - pos);
+// 	return (Helpers::precent_decoding(fragment));
+// }
+
+std::string	requestMessage::queryExtracting()
 {
-	return ("");
+	size_t		pos, len;
+	std::string	query;
+
+	pos = _URI.find("?");
+	if (pos == std::string::npos)
+		return ("");
+	len = _URI.length() - pos;
+	query = _URI.substr(pos, len);
+	return (Helpers::precent_decoding(query));
 }
 
 void	requestMessage::setReqURI(const std::string& uri)
 {
-	size_t	i = 0;
+	// size_t	i = 0;
 
 	std::cout << "\e[1;35mURI: " << uri << std::endl;
-	while (i < uri.length())
-	{
-		if (uri[i] != '%')
-		{
-			_URI += uri[i++];
-			continue ;
-		}
-		i++;
-		_URI += Helpers::hexaToDecimal(Helpers::strTolower(uri.substr(i, 2)));
-		i += 2;
-	}
-	_fragment = fragmentExtracting();
+	_URI = uri;
+	// **  you should first parse it to break it down into its individual components 
+	// **  (scheme, authority, path, query, and fragment). During this parsing step,
+	// **  you should not decode the percent-encoded characters.
+	_path = pathExtracting();
+	// _fragment = fragmentExtracting();
 	_query = queryExtracting();
 }
 
@@ -89,13 +110,6 @@ void	requestMessage::setMethod(const std::string& method)
 		throw (METHOD_NOT_IMPLEMENTED);
 	_method = method;
 }
-
-// void	requestMessage::setHttpVersion(const std::string& version)
-// {
-// 	if (version != "HTTP/1.1")
-// 		throw (HTTP_VERSION_NOT_SUPPORTED);
-// 	_http_version = version;
-// }
 
 void	requestMessage::setConnectionType(const std::string& type)
 {
@@ -144,7 +158,7 @@ std::string	requestMessage::locationMatch(const std::map<std::string, locationBl
 	unsigned int	len;
 
 	for (std::map<std::string, locationBlock>::const_iterator it = locs.begin(); it != locs.end(); ++it)
-		if ((len = isPathMatch(it->first, _URI)))
+		if ((len = isPathMatch(it->first, _path)))
 			matches[len] = it->first;
 	if (matches.size() == 0)
 		return ("");
@@ -355,7 +369,7 @@ void	requestMessage::requestHandling(int client_sock)
 		std::cout << _req_header << std::endl;
 		std::cout << "client fd: " << client_sock << std::endl;
 		headerParsing();
-		// ! you shoould set the state to the Reading for reading the body
+		// ! you should set the state to the Reading for reading the body
 		// ** Check if the method that is the request used is POST then continue reading the body
 		handling_state = DONE_REQ;
 		if (_method == "POST")
@@ -379,8 +393,9 @@ std::ostream&	operator<<(std::ostream& os, const requestMessage& req)
 {
 	os << "\e[1;34mRequest:\e[0m\n";
 	os << "Method: " << req._method <<std::endl;
-	os << "URI: " << req._URI << std::endl;
-	// os << "HTTP Version: " << req._http_version << std::endl;
+	os << "URI:(without precent decoding) " << req._URI << std::endl;
+	os << "PATH: " << req._path << std::endl;
+	os << "Query: " << req._query << std::endl;
 	os << "Persistent Connection: " << std::boolalpha << req._presistent_con << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = req._header_fields.begin(); it != req._header_fields.end(); ++it)
 		std::cout << it->first << ": " << it->second << std::endl;

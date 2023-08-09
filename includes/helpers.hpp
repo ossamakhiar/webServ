@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:38:04 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/06 15:06:35 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/09 13:21:37 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ public:
 	static unsigned int	hexaToInteger(const std::string&);
 	static char			hexaToDecimal(const std::string&);
 	static std::string	randomFileNameGen(void);
+	static std::string	precent_decoding(const std::string&);
 	static std::vector<std::string>	split(std::string str, const std::string& charset);
 
 	template<typename T, typename Iterator>

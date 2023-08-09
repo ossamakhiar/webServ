@@ -55,7 +55,7 @@ private:
 	std::string			_req_header;
 	std::vector<char>	_req_body;
 
-	std::string	_path, _query, _fragment;
+	std::string	_path, _query; //, _fragment;
 
 
 	// ? To define the server that client want to interact with.
@@ -88,7 +88,7 @@ private:
 	void	handleBodyRead(void);
 
 	std::string	pathExtracting(void);
-	std::string	fragmentExtracting(void);
+	// std::string	fragmentExtracting(void);
 	std::string	queryExtracting(void);
 
 	// * location setter
@@ -115,8 +115,10 @@ public:
 	void	setImportantFields(void);
 
 	// * Getters
-	int			getReqState(void) const;
-	std::string	getURI(void) const;
+	int					getReqState(void) const;
+	std::string			getURI(void) const;
+	const std::string&	getPath() const;
+	const std::string&	getQuery() const;
 
 	void	requestHandling(int client_sock);
 

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:42:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/08 16:55:44 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/09 17:21:46 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "virtualServer.hpp"
 #include "requestMessage.hpp"
+#include "Response.hpp"
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -40,6 +41,8 @@ private:
 
 	requestMessage		_request;
 	e_status_code		_status_code;
+
+	Response			_response;
 
 	Client(const Client& other);
 	Client& operator=(const Client& rhs);

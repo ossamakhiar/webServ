@@ -159,3 +159,22 @@ std::string	Helpers::randomFileNameGen(void)
 		file_name += alphanums[rand() % 63];
 	return (file_name);
 }
+
+std::string	Helpers::precent_decoding(const std::string& encoded)
+{
+	size_t		i = 0;
+	std::string	decoded;
+
+	while (i < encoded.length())
+	{
+		if (encoded[i] != '%')
+		{
+			decoded += encoded[i++];
+			continue ;
+		}
+		i++;
+		decoded += Helpers::hexaToDecimal(Helpers::strTolower(encoded.substr(i, 2)));
+		i += 2;
+	}
+	return (decoded);
+}

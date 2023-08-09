@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/07 17:13:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/08 12:06:39 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/09 22:25:35 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,10 @@
 class Response
 {
 private:
-	std::map<int, std::string>	error_pages;
+	std::map<int, std::string>	_error_pages;
 
-	
+
+	void	checkErrorCode(int status_code);
 
 public:
 	Response();
