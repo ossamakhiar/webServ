@@ -73,10 +73,22 @@ std::string	randomFileNameGen(void)
 // 	std::cout << str1 << std::endl;
 // }
 
-int main(void)
-{
-	// func();
-	// system("leaks a.out");
-	return (0);
+#include <iostream>
+#include <sys/stat.h>
 
+bool pathExists(const std::string& path) {
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0);
+}
+
+int main() {
+    std::string path = "./www/";
+
+    if (pathExists(path)) {
+        std::cout << "Path exists." << std::endl;
+    } else {
+        std::cout << "Path does not exist." << std::endl;
+    }
+
+    return 0;
 }

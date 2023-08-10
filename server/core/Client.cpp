@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/10 16:27:20 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/10 20:51:43 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ Client::Client(int fd, struct sockaddr_in addr, std::vector<virtualServer*>	&end
 	_location(NULL),
 	_request(_vs_endpoint, _vs, _location)
 {
+	_status_code = OK;
 	client_state = READING_REQUEST;
 	this->client_socket = fd;
 	this->client_addr = addr;
@@ -70,10 +71,11 @@ void	Client::readRequest()
 
 void	Client::makeResponse(void)
 {
+	std::cout << "send request by meeeee\n";
 	_response.setVS(_vs);
 	_response.setLocation(_location);
 	try{
-		_response.buildResponse(_request, _status_code);
+		_response.buildResponse(_request, client_socket, _status_code);
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
@@ -84,9 +86,8 @@ void	Client::makeResponse(void)
 		std::cout << *_location << std::endl;
 	// if (_vs)
 	// 	std::cout << *_vs << std::endl;
-	std::cout << "send request by meeeee\n";
-	write(client_socket, "HTTP/1.1 200 OK\n", 16);
-	write(client_socket, "Server: oussama khiar\n\n", 23);
-	write(client_socket, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);
+	// write(client_socket, "HTTP/1.1 200 OK\n", 16);
+	// write(client_socket, "Server: oussama khiar\n\n", 23);
+	// write(client_socket, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);
 	std::cout << "+++++++ response sent ++++++++" << std::endl;
 }

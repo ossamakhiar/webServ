@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/07 17:13:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/10 17:01:49 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/10 18:58:44 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@
 class Response
 {
 private:
+	std::string	_html_start;
+	std::string	_html_close;
+
 	bool	_error_body;
 
 	std::map<int, std::string>	_reason_phrase; // ** map a status code with it reason
@@ -55,7 +58,7 @@ public:
 	void	setVS(virtualServer*);
 	void	setLocation(locationBlock*);
 
-	void	buildResponse(const requestMessage&, int status_code = OK);
+	void	buildResponse(const requestMessage&, int client_socket, int status_code = OK);
 	
 };
 

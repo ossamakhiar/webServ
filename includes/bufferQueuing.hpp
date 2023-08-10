@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 15:53:22 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/07 16:46:53 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/10 18:33:49 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,9 @@
 class bufferQueuing
 {
 private:
-	bool						size_extracted;
-	size_t						start;
-	size_t						size;
+	bool				size_extracted;
+	size_t				start;
+	size_t				size;
 	std::vector<char>	buffer_queue;
 	std::vector<char>	data;
 

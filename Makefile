@@ -5,7 +5,7 @@ SRCS = ./server/main.cpp ./server/configSyntax.cpp ./helpers/helpers.cpp ./serve
 		./server/core/Response.cpp ./helpers/PathVerifier.cpp
 OBJS = $(SRCS:.cpp=.o)
 CPP = c++
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g
+CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 CPPFLAGS += -I./includes
 
 all: $(NAME)

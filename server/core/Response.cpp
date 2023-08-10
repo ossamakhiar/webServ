@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/08 12:06:53 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/10 17:30:56 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/10 21:01:14 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 Response::Response() : _error_body(false), \
 	_vs(NULL), _location(NULL)
 {
+	_html_start = "<html>\n<head>\n<title>page--</title><head>\n<body>";
+	_html_close = "</body>\n</html>";
 	fillDefaultErrorPages();
 	// _error_pages.insert(std::pair<int, std::string>(BAD_REQUEST, "<html><head></head><body><h1>400 bad request</h1></body></html>"))
 }
@@ -108,22 +110,30 @@ void	Response::directoryListing(const std::string& path)
 {
 	DIR				*dir_ptr;
 	struct dirent	*dir_entity;
-	std::string		h1_header = "<h1>Director listing for ";
+	std::string		html_doc = _html_start + "<h1>Director listing for ";
 
-	h1_header += path;
-	h1_header += "</h1>\n<hr>\n<ul>\n";
+	html_doc += path;
+	html_doc += "</h1>\n<hr>\n<ul>\n";
 	// * list the content of the directory (path)
-	if (!_location->get_autoindex())
+	if (_location && !_location->get_autoindex()) // ! if loactioon exist, and autoindex is off so return
 		return ;
-	for (size_t i = 0; i < h1_header.length(); ++i) // ! a lot of copying to the body make something to it..... !!!!!
-		_body.push_back(h1_header[i]);
+	// for (size_t i = 0; i < h1_header.length(); ++i) // ! a lot of copying to the body make something to it..... !!!!!
+	// 	_body.push_back(h1_header[i]);
 	dir_ptr = opendir(path.c_str());
 	while ((dir_entity = readdir(dir_ptr)) != NULL)
 	{
 		// ** get name of teh entity and type
-		
+		html_doc += "<li>";
+		html_doc += "<a href=\"./";
+		html_doc += dir_entity->d_name;
+		html_doc += "\">";
+		html_doc += dir_entity->d_name;
+		html_doc += "</a></li>\n";
 	}
-	
+	html_doc += _html_close;
+	for (size_t i = 0; i < html_doc.length(); ++i)
+		_body.push_back(html_doc[i]);
+	closedir(dir_ptr);
 }
 
 void	Response::directoryServing(const std::string& path)
@@ -146,6 +156,7 @@ void	Response::requestedPathServe(const requestMessage& req)
 	std::string	path;
 
 	path = validateRootPath(req.getPath());
+	std::cout  << "\e[1;32mPath: \e[0m" << path << std::endl;
 	if (!PathVerifier::path_exists(path))
 	{
 		// _body = _error_pages[NOT_FOUND];
@@ -158,7 +169,7 @@ void	Response::requestedPathServe(const requestMessage& req)
 	
 }
 
-void	Response::buildResponse(const requestMessage& req, int status_code)
+void	Response::buildResponse(const requestMessage& req, int client_socket, int status_code)
 {
 	// ** checking of status code, if is it not ok, respond with the associated page error
 	checkErrorCode(status_code);
@@ -166,9 +177,23 @@ void	Response::buildResponse(const requestMessage& req, int status_code)
 	if (!_error_body)
 		requestedPathServe(req);
 
+	for (size_t i = 0; i < _body.size(); ++i)
+		std::cout << _body[i];
+	std::cout << std::endl;
+	std::string responseHeaders = "HTTP/1.1 200 OK\r\n";
+    responseHeaders += "Server: oussama khiar\r\n";
+    responseHeaders += "Content-Length: " + std::to_string(_body.size()) + "\r\n";
+    responseHeaders += "\r\n";
 
+	std::cout << "client-socket: " << client_socket << std::endl;
+    if (write(client_socket, responseHeaders.c_str(), responseHeaders.size()) < 0) {
+        throw std::runtime_error("Error writing response headers");
+    }
+
+	if (write(client_socket, &_body[0], _body.size()) == -1)
+		throw std::runtime_error("SERVER DOWN");
 	// ! header construction 
 }
 
 
-// *************** END *****************
+// *************** END *****************128
