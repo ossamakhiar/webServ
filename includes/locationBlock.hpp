@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 21:54:18 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 23:02:49 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/10 16:08:37 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,8 @@ public:
 	void	setDirListing(const std::string&);
 
 	// TODO :: Getters
-	const std::string& getRoot(void) const;
+	const std::string&	getRoot(void) const;
+	bool				get_autoindex(void) const;
 
 	std::map<std::string, std::string> getCGI(void)
 	{

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:42:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/09 17:21:46 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/09 23:19:53 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ private:
 
 	std::vector<virtualServer*>	&_vs_endpoint;
 	virtualServer		*_vs;// ** vServer That client communicate to
-	locationBlock		*_location;
+	locationBlock		*_location; // ** set the related location to a URI if it's exist..
 	std::string			_path;
 
 	requestMessage		_request;

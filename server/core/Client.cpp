@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/09 22:21:11 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/10 16:27:20 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,10 @@ void	Client::readRequest()
 
 void	Client::makeResponse(void)
 {
+	_response.setVS(_vs);
+	_response.setLocation(_location);
 	try{
-		_response.buildResponse();
+		_response.buildResponse(_request, _status_code);
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}

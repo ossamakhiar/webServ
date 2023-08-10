@@ -64,7 +64,7 @@ std::vector<std::string>	Helpers::split(std::string str, const std::string& char
 	while ((pos = str.find_first_of(charset)) != std::string::npos)
 	{
 		token = str.substr(0, pos);
-		str.erase(0, pos + 1);
+		str.erase(0, pos + 1); // * plus one to erase the delimeter also
 		if (!token.empty())
 			tokens.push_back(token);
 	}

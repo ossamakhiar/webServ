@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 22:00:20 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 23:04:36 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/10 16:09:06 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,12 @@ void	locationBlock::setDirListing(const std::string& inpt)
 }
 
 // TODO :: Getters
+
+bool	locationBlock::get_autoindex(void) const
+{
+	return (autoindex);
+}
+
 const std::string& locationBlock::getRoot(void) const
 {
 	return (root);
