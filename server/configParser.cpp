@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 15:47:16 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 23:06:15 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 15:09:27 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ configParser::configParser(const std::string& file_name)
 	locationDirectives.insert(std::pair<std::string, ldSeter>("allowed_methods", &locationBlock::setAllowedMethods));
 	locationDirectives.insert(std::pair<std::string, ldSeter>("cgi", &locationBlock::setCgi));
 	locationDirectives.insert(std::pair<std::string, ldSeter>("autoindex", &locationBlock::setDirListing));
+	locationDirectives.insert(std::pair<std::string, ldSeter>("index", &locationBlock::setIndex));
 	// locationDirectives.insert(std::pair<std::string, int>("upload_post", 1));
 
 	// ** Server Directives DB

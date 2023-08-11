@@ -34,8 +34,11 @@ enum e_handling_states
 enum e_status_code
 {
 	OK = 200,
+	MOVED_PERMANENTLY = 301,
 	BAD_REQUEST = 400,
+	FORBIDDEN = 403,
 	NOT_FOUND = 404,
+	METHOD_NOT_ALLOWED = 405,
 	REQUEST_ENTITY_TOO_LARGE = 413,
 	REQUEST_URI_TOO_LONG = 414,
 	INTERNAL_SERVER_ERROR = 500,
@@ -96,6 +99,8 @@ private:
 	unsigned int	isPathMatch(std::string, std::string);
 	std::string		locationMatch(const std::map<std::string, locationBlock>& locs);
 
+	bool	isMethodAllowed(void);
+
 	requestMessage(const requestMessage&);
 	requestMessage& operator=(const requestMessage&);
 
@@ -120,6 +125,7 @@ public:
 	std::string			getURI(void) const;
 	const std::string&	getPath() const;
 	const std::string&	getQuery() const;
+	const std::string&	getMethod() const;
 
 	void	requestHandling(int client_sock);
 

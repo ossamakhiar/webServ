@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 22:00:20 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/10 16:09:06 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 15:45:50 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ void	locationBlock::setCgi(const std::string& inpt)
 	std::vector<std::string>	tokens;
 
 	tokens = Helpers::split(inpt, " \t");
+	if (access(tokens[1].c_str(), F_OK | X_OK))
+		throw std::runtime_error("error: cgi-bin not excutable");
 	cgi.insert(std::pair<std::string, std::string>(tokens[0], tokens[1]));
 }
 
@@ -72,6 +74,16 @@ void	locationBlock::setDirListing(const std::string& inpt)
 		throw std::runtime_error("error: bad directory listing argument");
 }
 
+void	locationBlock::setIndex(const std::string& inpt)
+{
+	std::vector<std::string>	tokens;
+
+	tokens = Helpers::split(inpt, " \t");
+	// if (!tokens.size())
+	// 	throw std::runtime_error("error: index empty")
+	index = tokens;
+}
+
 // TODO :: Getters
 
 bool	locationBlock::get_autoindex(void) const
@@ -82,6 +94,16 @@ bool	locationBlock::get_autoindex(void) const
 const std::string& locationBlock::getRoot(void) const
 {
 	return (root);
+}
+
+const std::vector<std::string>&	locationBlock::getAllowedMethods() const
+{
+	return (allowed_methods);
+}
+
+const std::vector<std::string>&	locationBlock::getIndexs(void) const
+{
+	return (index);
 }
 
 

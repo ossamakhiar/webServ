@@ -30,6 +30,11 @@ requestMessage::~requestMessage()
 }
 
 // TODO :: Getters
+const std::string&	requestMessage::getMethod() const
+{
+	return (_method);
+}
+
 int	requestMessage::getReqState(void) const
 {
 	return (handling_state);
@@ -172,7 +177,7 @@ void	requestMessage::setLocation(void)
 
 	path = locationMatch(locs);
 	if (path.empty())
-		return ;
+		throw (NOT_FOUND);
 	_location = &(locs[path]);
 }
 
@@ -307,6 +312,13 @@ void	requestMessage::setImportantFields(void)
 	_hostname = _header_fields["Host"];
 }
 
+bool	requestMessage::isMethodAllowed(void)
+{
+	if (!_location) // ! remove this condition, because now i throw error when there is no match location
+		return (_method == "GET");
+	return (std::count(_location->getAllowedMethods().begin(), _location->getAllowedMethods().end(), _method));
+}
+
 void	requestMessage::headerParsing(void)
 {
 	size_t		i = 0, pos, colon_pos;
@@ -324,6 +336,8 @@ void	requestMessage::headerParsing(void)
 		i = pos + 2;
 	}
 	(setImportantFields(), setProperVS(), setLocation());
+	if (!isMethodAllowed())
+		throw (METHOD_NOT_ALLOWED);
 	if (_method == "POST" && !_header_fields.count("Content-Length") && !_header_fields.count("Transfer-Encoding"))
 		throw (BAD_REQUEST);
 }

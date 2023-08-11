@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 21:54:18 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/10 16:08:37 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 15:44:55 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,13 @@ public:
 	void	setAllowedMethods(const std::string&);
 	void	setCgi(const std::string&);
 	void	setDirListing(const std::string&);
+	void	setIndex(const std::string&);
 
 	// TODO :: Getters
-	const std::string&	getRoot(void) const;
-	bool				get_autoindex(void) const;
+	const std::string&				getRoot(void) const;
+	bool							get_autoindex(void) const;
+	const std::vector<std::string>&	getAllowedMethods(void) const;
+	const std::vector<std::string>&	getIndexs(void) const;
 
 	std::map<std::string, std::string> getCGI(void)
 	{

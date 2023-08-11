@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:38:04 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/10 15:34:44 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 15:17:49 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,11 @@
 # define HELPERS_HPP
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <unistd.h>
 
 class Helpers
 {

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:35:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/02 22:42:05 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 15:19:48 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ configSyntax::configSyntax()
 	locationDirectives.insert(std::pair<std::string, int>("root", 1));
 	locationDirectives.insert(std::pair<std::string, int>("cgi", 2));
 	locationDirectives.insert(std::pair<std::string, int>("upload_post", 1));
+	locationDirectives.insert(std::pair<std::string, int>("index", -1));
 
 	// ** Server Directives DB
 	serverDirectives.insert(std::pair<std::string, int>("listen", 1));
@@ -46,6 +47,8 @@ bool	configSyntax::locationLine(const std::vector<std::string>& tokens)
 
 bool	configSyntax::directiveOperations(std::map<std::string, int>::iterator it, const std::string& token, size_t size)
 {
+	if (it->second == -1)
+		return (true);
 	if (token != "allowed_methods")
 		if (token != it->first || size != static_cast<size_t>(it->second) + 1)
 			return (false);
