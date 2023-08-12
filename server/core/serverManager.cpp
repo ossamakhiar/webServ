@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 13:03:00 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/08 17:30:09 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/12 15:25:13 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,6 +172,7 @@ void	serverManager::serveClients(void)
 			if (it->second->getState() == BUILD_RESPONSE)
 			{
 				std::cout << "\e[1;34mRequest Reading Done\e[0m" << std::endl;
+				// ! set for response, the imporatant fields
 				FD_SET(fd, &write_fds);
 				FD_CLR(fd, &read_fds);
 			}
@@ -180,9 +181,13 @@ void	serverManager::serveClients(void)
 		{
 			it->second->makeResponse();
 			// TODO :: check if it's a presistent connection & handle it
-			dropClient(fd);
-			FD_CLR(fd, &write_fds);
-			keys_erase.push_back(fd);
+			if (it->second->getState() == CLIENT_DONE)
+			{
+				dropClient(fd);
+				FD_CLR(fd, &write_fds);
+				keys_erase.push_back(fd);
+				std::cout << "+++++++ response sent ++++++++" << std::endl;
+			}
 		}
 	}
 	for (std::vector<int>::iterator it = keys_erase.begin(); it != keys_erase.end(); ++it)

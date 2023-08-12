@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/07 15:58:37 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 19:58:20 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ ftString::~ftString()
 	delete[] (_str);
 }
 
-ftString::ftString(const char* str)
+ftString::ftString(const char* str) : _str(NULL)
 {
 	size_t i;
 	size_t	len = strlen(str);
@@ -34,7 +34,7 @@ ftString::ftString(const char* str)
 	_str[i] = 0;
 }
 
-ftString::ftString(const char* str, size_t len)
+ftString::ftString(const char* str, size_t len) : _str(NULL)
 {
 	size_t i;
 
@@ -43,6 +43,12 @@ ftString::ftString(const char* str, size_t len)
 	for (i = 0; i < len; i++)
 		_str[i] = str[i];
 	_str[i] = 0;
+}
+
+ftString::ftString(const std::string& str) : _str(NULL)
+{
+	// _size = str.length();
+	*this = str;
 }
 
 ftString::ftString(const ftString& other) : _str(NULL)
@@ -59,6 +65,16 @@ ftString&	ftString::operator=(const ftString& rhs)
 		delete[] _str;
 	_str = new char[_size + 1];
 	memcpy(_str, rhs._str, _size + 1);
+	return (*this);
+}
+
+ftString&	ftString::operator=(const std::string& rhs)
+{
+	_size = rhs.length();
+	if (_str)
+		delete[] _str;
+	_str = new char[_size + 1];
+	memcpy(_str, rhs.c_str(), _size + 1);
 	return (*this);
 }
 
@@ -105,6 +121,11 @@ const char*	ftString::c_str(void) const
 size_t	ftString::size(void) const
 {
 	return (_size);
+}
+
+size_t	ftString::length(void) const
+{
+	return (this->size());
 }
 
 size_t	ftString::strlen(const char *str) const
@@ -191,6 +212,19 @@ void	ftString::clear(void)
 	*_str = 0;
 }
 
+void	ftString::resize(size_t n)
+{
+	size_t i = 0;
+	char	*tmp = new char[n + 1];
+
+	for (i = 0; i < _size; i++)
+		tmp[i] = _str[i];
+	std::cout << "Resize: " << i << std::endl;
+	tmp[i] = 0;
+	delete[] _str;
+	_size = n;
+	_str = tmp;
+}
 
 std::ostream& operator<<(std::ostream &os, const ftString& str)
 {

@@ -2,6 +2,9 @@
 #include <vector>
 #include <map>
 // #include <cstdlib>
+#include "ftString.hpp"
+#include "helpers.hpp"
+#include <fstream>
 #include <stdexcept>
 
 std::vector<std::string>	split(std::string str, const std::string& charset)
@@ -84,8 +87,16 @@ int	main(void)
 	// 	std::cout << e.what() << std::endl;
 	// }
 	// std::cout << (1 << 16) << std::endl;
-	unsigned short x = -1;
-	std::cout << x << " " << (1 << 16) - 1 << std::endl;
+	// unsigned short x = -1;
+	// std::cout << x << " " << (1 << 16) - 1 << std::endl;
+	ftString	str;
+	std::string	x = "oussama khiar";
+	str = x;
+	// std::ifstream	in;
+
+	// in.open("t.c");
+	// Helpers::readFile(in, str);
+	std::cout << str << std::endl;
 	return (0);
 }
 

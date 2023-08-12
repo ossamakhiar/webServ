@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:42:59 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/09 23:19:53 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/12 15:53:07 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ enum e_client_states
 {
 	READING_REQUEST,
 	BUILD_RESPONSE,
+	CLIENT_DONE,
 	DISCONNECTED
 };
 
@@ -57,6 +58,8 @@ public:
 	// TODO :: Getters
 	virtualServer	*getVS(void) const;
 	int				getState(void) const;
+	void			responseImportantSettings(void);
+	// int				getResponseState(void) const;
 
 	void	readRequest(void);
 	void	makeResponse(void);

@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/21 21:38:04 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/11 15:17:49 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 19:50:20 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <vector>
 #include <stdexcept>
 #include <unistd.h>
+#include "ftString.hpp"
 
 class Helpers
 {
@@ -39,6 +40,7 @@ public:
 	static char			hexaToDecimal(const std::string&);
 	static std::string	randomFileNameGen(void);
 	static std::string	precent_decoding(const std::string&);
+	static void			readFile(std::ifstream &is, ftString& str);
 
 	static std::vector<std::string>	split(std::string str, const std::string& charset);
 

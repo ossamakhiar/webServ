@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 16:28:57 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/07 15:57:19 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/11 19:59:44 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,10 @@ public:
 	ftString();
 	ftString(const char*);
 	ftString(const char*, size_t);
+	ftString(const std::string& str);
 	ftString(const ftString&);
 	ftString&	operator=(const ftString&);
+	ftString&	operator=(const std::string& rhs);
 	~ftString();
 
 	const char*	c_str(void) const;
@@ -40,7 +42,9 @@ public:
 	ftString&	append(const char* str, size_t len);
 	ftString	substr(size_t pos, size_t len = npos);
 	size_t		size(void) const;
+	size_t		length(void) const;
 	void		clear(void);
+	void		resize(size_t n);
 
 	size_t		find(const char* str, size_t pos = 0) const;
 

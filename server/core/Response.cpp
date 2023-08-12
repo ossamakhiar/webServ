@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/08 12:06:53 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/11 17:55:03 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/12 16:51:56 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 Response::Response() : _client_socket(-1), _error_body(false), \
 	_vs(NULL), _location(NULL)
 {
+	_cgi_exists = false;
+	_client_socket = -1;
+	_body_fd = -1;
+	_req = NULL;
 	_responsing_state = BODY_PRODUCING;
 	_stations[BODY_PRODUCING] = &Response::bodyProdcucers;
 
@@ -54,13 +58,26 @@ void	Response::setLocation(locationBlock* loc)
 	_location = loc;
 }
 
-void	Response::setRequest(const requestMessage& req, int status_code)
+void	Response::setRequest(requestMessage *req)
 {
-	_req = &req;
-	_status_code = status_code;
-	_request_method = _req->getMethod();
+	_req = req;
 }
 
+void	Response::setStatusCode(int status_code)
+{
+	_status_code = status_code;
+}
+
+void	Response::setRequestMethod(const std::string& method)
+{
+	_request_method = method;
+}
+
+// TODO :: Getters
+int	Response::getResponseState(void) const
+{
+	return (_responsing_state);
+}
 
 // * Helpers
 
@@ -74,6 +91,7 @@ void	Response::fillReasonPhrases(void)
 
 void Response::fillDefaultErrorPages(void)
 {
+	_error_pages[MOVED_PERMANENTLY] = "<html><body><h1>301 Moved Permanently</h1><hr><p>The resource has been moved permanently.</p></body></html>";
     _error_pages[BAD_REQUEST] = "<html><body><h1>400 Bad Request</h1><hr><p>Your request was invalid.</p></body></html>";
     _error_pages[401] = "<html><body><h1>401 Unauthorized</h1><hr><p>You are not authorized to access this resource.</p></body></html>";
     _error_pages[FORBIDDEN] = "<html><body><h1>403 Forbidden</h1><hr><p>You don't have permission to access this resource.</p></body></html>";
@@ -86,14 +104,6 @@ std::string	Response::validateRootPath(const std::string& requested_path)
 {
 	std::string	path;
 
-	// if (_location)
-	// {
-	// 	path += _location->getRoot();
-	// 	if (path[path.length() - 1] == '/' && requested_path[0] == '/')
-	// 		path.erase(path.length() - 1);
-	// 	path += requested_path;
-	// 	return (path);
-	// }
 	// ** case of there no location match the requested path, join it with the root of the server
 	path = (_location != NULL) ? _location->getRoot() : _vs->getRootDir();
 	if (path[path.length() - 1] == '/' && requested_path[0] == '/')
@@ -101,6 +111,11 @@ std::string	Response::validateRootPath(const std::string& requested_path)
 	path += requested_path;
 	return (path);
 }
+
+
+
+
+
 
 // *************** Directory requested serving ***************
 
@@ -131,8 +146,8 @@ void	Response::directoryListing(const std::string& path)
 	std::string		html_doc = _html_start + "<h1>Director listing for " + path + "</h1>\n<hr>\n<ul>\n";
 
 	// * list the content of the directory (path)
-	if (_location && !_location->get_autoindex()) // ! if loactioon exist, and autoindex is off so return
-		return ;
+	if (_location && !_location->get_autoindex()) // ! if loactioon exist, and autoindex is off so FORBEDDIN
+		throw (FORBIDDEN);
 	dir_ptr = opendir(path.c_str());
 	while ((dir_entity = readdir(dir_ptr)) != NULL)
 	{
@@ -164,7 +179,7 @@ void	Response::directoryServing(const std::string& path)
 		{
 			_body += line;
 			if (!index_file.eof())
-				_body += '\n';
+				_body += "\n";
 		}
 		index_file.close();
 		return ;
@@ -174,7 +189,12 @@ void	Response::directoryServing(const std::string& path)
 
 // **************** Respond - Directory requested [END] *************
 
-// ** RESPONSING....
+
+
+
+
+
+// ** RESPONSING Sending....
 
 void	Response::responseHeader(void)
 {
@@ -184,45 +204,45 @@ void	Response::responseHeader(void)
 	_headers = status_line;
 	if (_status_code == MOVED_PERMANENTLY)
 		_headers += "Location: " + _redirection_path + "\r\n";
-	_headers += "Content-Length: " + std::to_string(_body.length()) + "\r\n\r\n";
+	_headers += "Connection: keep-alive\r\n";
+	_headers += "Content-Length: " + std::to_string(_body.length());
+	_headers += "\r\n\r\n";
+}
+
+void	Response::reposnseSending(void)
+{
+	int bytes = 0;
+
+	if ((bytes = write(_client_socket, _body.c_str(), _content_len)) == -1)
+	{
+		perror("sending");
+		throw (INTERNAL_SERVER_ERROR);
+	}
+
+	if (bytes == 0)
+		throw (-1);
+	std::cout << "Bytes.: " << bytes  << " " << _content_len << std::endl;
+	_content_len -= bytes;
+	if (_content_len <= 0)
+		_responsing_state = RESPONSE_DONE;
+	_body = _body.substr(bytes);
 }
 
 void	Response::respond(void)
 {
 	// ! header making
+
 	responseHeader();
+	std::cout << "header: " << _headers << "\n";
 
 	// ! Sending state setting
 	if (write(_client_socket, _headers.c_str(), _headers.size()) < 0)
-        throw std::runtime_error("Error writing response headers");
-
-	if (write(_client_socket, _body.c_str(), _body.length()) == -1)
-		throw std::runtime_error("SERVER DOWN");
+        throw (INTERNAL_SERVER_ERROR);
+	_content_len = _body.length();
+	_responsing_state = RESPONSE_SENDING;
 }
 
-void	Response::checkErrorCode(int status_code) // ? Body producer
-{
-	_error_body = true; // ? why this maybe i'll never neeed it
-	_body = _error_pages[status_code];
-	respond();
-}
-
-void	Response::fileServing(const std::string& path)
-{
-	std::ifstream	file;
-	std::string		line;
-
-	file.open(path.c_str(), std::ios::in);
-	if (!file.good())
-		throw (INTERNAL_SERVER_ERROR);
-	while (std::getline(file, line))
-	{
-		_body += line;
-		if (!file.eof())
-			_body += '\n';
-	}
-	file.close();
-}
+// **** END RESPONSING ****
 
 // ** method handlers
 void	Response::getHandler(void) // ? GET Request handler...
@@ -245,10 +265,42 @@ void	Response::getHandler(void) // ? GET Request handler...
 		directoryServing(path); // ** server index, or directory listing on case of autoindex
 		return ;
 	}
+	if (_cgi_exists)
+	{
+		// set path to cgi output
+	}
 	fileServing(path);
 }
 
+
+
 // ************* BODY PRODUCERS *********
+
+void	Response::checkErrorCode(int status_code) // ? Body producer
+{
+	//_error_body = true; // ? why this maybe i'll never neeed it
+	if (_error_pages.count(status_code))
+		_body = _error_pages[status_code];
+	respond(); // you should respond here because, it called in more than one case
+}
+
+void	Response::fileServing(const std::string& path)
+{
+	std::ifstream	file;
+	std::string		line;
+	// std::streamsize	size;
+
+	file.open(path.c_str(), std::ios::in);
+	if (!file.good())
+		throw (INTERNAL_SERVER_ERROR);
+	while (std::getline(file, line))
+	{
+		_body += line;
+		if (!file.eof())
+			_body += '\n';
+	}
+	file.close();
+}
 
 void	Response::bodyProdcucers(void)
 {
@@ -274,19 +326,22 @@ void	Response::bodyProdcucers(void)
 
 // ********
 
-void	Response::buildResponse(const requestMessage& req, int client_socket, int status_code)
+void	Response::buildResponse(int client_socket)
 {
-	// _req = &req;
-	// _status_code = status_code;
-	setRequest(req, status_code);
+	// if (_client_socket == -1)
 	_client_socket = client_socket;
-	try {
-		StationsPtr	station = _stations[_responsing_state];
 
-		(this->*station)();
+	std::cout << "\e[1;33mbuilding response call..................\e[0m" << client_socket << std::endl;
+	try {
+		if (_responsing_state == BODY_PRODUCING)
+			bodyProdcucers();
+		else if (_responsing_state == RESPONSE_SENDING)
+			reposnseSending();
 	} catch (e_status_code code) {
 		_status_code = code;
 		checkErrorCode(_status_code);
+		reposnseSending();
+		_responsing_state = RESPONSE_DONE;
 	}
 	
 	// ** checking of status code, if is it not ok, respond with the associated page error

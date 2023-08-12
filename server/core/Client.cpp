@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/30 22:44:06 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/10 20:51:43 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/12 16:15:44 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,14 @@ int				Client::getState(void) const
 	return (client_state);
 }
 
+void	Client::responseImportantSettings(void)
+{
+	_response.setVS(_vs);
+	_response.setLocation(_location);
+	_response.setRequest(&_request);
+	_response.setStatusCode(_status_code);
+	_response.setRequestMethod(_request.getMethod());
+}
 
 // TODO :: client handler
 void	Client::readRequest()
@@ -67,27 +75,30 @@ void	Client::readRequest()
 		if (code == ZERO_READED)
 			client_state = DISCONNECTED;
 	}
+
+	// ! set important Reponse fileds
+	if (client_state == BUILD_RESPONSE)
+		responseImportantSettings();
 }
 
 void	Client::makeResponse(void)
 {
 	std::cout << "send request by meeeee\n";
-	_response.setVS(_vs);
-	_response.setLocation(_location);
+
 	try{
-		_response.buildResponse(_request, client_socket, _status_code);
+		this->_response.buildResponse(client_socket);
 	} catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
 
+	if (_response.getResponseState() == RESPONSE_DONE)
+		client_state = CLIENT_DONE;
+
+
 	// ******
-	std::cout << "\e[1;31mLocation: \e[0m" << _request.getURI() << std::endl;
-	if (_location)
-		std::cout << *_location << std::endl;
+	// std::cout << "\e[1;31mLocation: \e[0m" << _request.getURI() << std::endl;
+	// if (_location)
+	// 	std::cout << *_location << std::endl;
 	// if (_vs)
 	// 	std::cout << *_vs << std::endl;
-	// write(client_socket, "HTTP/1.1 200 OK\n", 16);
-	// write(client_socket, "Server: oussama khiar\n\n", 23);
-	// write(client_socket, "<h1 style=\"color: green;\">Hello World</h1>\n", 41);
-	std::cout << "+++++++ response sent ++++++++" << std::endl;
 }

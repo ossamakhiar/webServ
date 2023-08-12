@@ -178,3 +178,15 @@ std::string	Helpers::precent_decoding(const std::string& encoded)
 	}
 	return (decoded);
 }
+
+void	Helpers::readFile(std::ifstream& is, ftString& str)
+{
+    is.seekg(0, std::ios::end); // ? read about this
+    std::streamsize size = is.tellg();
+    is.seekg(0, std::ios::beg);
+
+    str.clear();
+    str.resize(size);
+	std::cout << "SIZEEEEe: " << size << std::endl;
+    is.read(&str[0], size);
+}

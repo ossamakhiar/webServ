@@ -6,7 +6,7 @@
 /*   By: okhiar <okhiar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/07 17:13:43 by okhiar            #+#    #+#             */
-/*   Updated: 2023/08/11 17:55:29 by okhiar           ###   ########.fr       */
+/*   Updated: 2023/08/12 15:56:56 by okhiar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <dirent.h>
 #include "helpers.hpp"
+#include "ftString.hpp"
 #include "PathVerifier.hpp"
 // #include "fString"
 #include "requestMessage.hpp"
@@ -23,7 +24,8 @@ enum e_responsing_states
 {
 	BODY_PRODUCING,
 	CGI_WAITING,
-	RESPONSE_SENDING
+	RESPONSE_SENDING,
+	RESPONSE_DONE
 };
 
 class Response
@@ -33,6 +35,8 @@ private:
 	typedef void (Response::*MethodHandler)(void);
 
 	int	_client_socket;
+
+	int	_content_len;
 
 	int	_responsing_state;
 	std::map<int, StationsPtr>				_stations;
@@ -48,8 +52,9 @@ private:
 
 	std::string	_redirection_path;
 
+	int			_body_fd;
 	std::string	_headers;
-	std::string	_body; // ? response body
+	std::string	_body; // ? response body, ftString, a raw data buffer it cares about the it length only
 
 	virtualServer	*_vs;
 	locationBlock	*_location;
@@ -57,6 +62,8 @@ private:
 	int						_status_code;
 	const requestMessage	*_req;
 	std::string				_request_method;
+
+	bool	_cgi_exists;
 
 
 
@@ -74,6 +81,7 @@ private:
 	// void	requestedPathServe(const requestMessage&);
 	void	fileServing(const std::string& path);
 
+	void	reposnseSending(void);
 	void	responseHeader(void);
 	void	respond(void);
 	// * Body producers
@@ -90,11 +98,17 @@ public:
 	Response(const Response&);
 	Response&	operator=(const Response&);
 
+	// * getters
+	int	getResponseState(void) const;
+
 	// * setters
 	void	setVS(virtualServer*);
 	void	setLocation(locationBlock*);
+	void	setRequest(requestMessage *);
+	void	setStatusCode(int);
+	void	setRequestMethod(const std::string&);
 
-	void	buildResponse(const requestMessage&, int client_socket, int status_code = OK);
+	void	buildResponse(int client_socket);
 	
 };
 
