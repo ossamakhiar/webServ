@@ -161,7 +161,7 @@ std::string	Response::checkIndex(const std::string& path)
 		std::cout << "index path: \e[0m" << index_path << std::endl;
 		if (PathVerifier::path_exists(index_path)) // ! maybe you check also if it's a file
 			return (index_path);
-	}file_ext
+	}
 	return ("");
 }
 
@@ -313,7 +313,7 @@ void	Response::getHandler(void) // ? GET Request handler...
 	}
 	// fileServing(_req->getPhysicalPath());
 	// maybe here i should check the cgi maybe, maybe...
-	_body_fd = open(rooted.c_str(), O_RDONLY);
+	_body_fd = open(rooted_path.c_str(), O_RDONLY);
 
 	if (_body_fd == -1)
 		throw (INTERNAL_SERVER_ERROR);
@@ -335,18 +335,18 @@ void	Response::postHandler(void)
 
 char	**cgi_env_setting(void)
 {
-	char	**env;
+	char	**env = NULL;
 
-	// cgi Env setting\
+	// cgi Env setting
 
 	return (env);
 }
 
 void	Response::cgi_handler(void)
 {
-	int		pid;
-	char	**cgi_env;
-	char	*cgi_args[3];
+	int			pid;
+	char		**cgi_env;
+	const char	*cgi_args[3];
 
 	cgi_env = cgi_env_setting();
 	cgi_args[0] = _location->getCGI().at(_cgi_ext).c_str();
@@ -356,6 +356,10 @@ void	Response::cgi_handler(void)
 	pid = fork();
 	if (!pid)
 	{
+		if (_request_method == "POST")
+		{
+			// dup2 cgi input to the post body file
+		}
 		execve(cgi_args[0], cgi_args, cgi_env);
 		exit(EXIT_FAILURE);
 	}
@@ -388,12 +392,12 @@ void	Response::DirectoryRequestedChecking(const std::string& path)
 
 
 
-bool	checkCgiExistence(void)
+bool	Response::checkCgiExistence(void)
 {
 	std::string	file_ext;
 
-	file_ext = PAthVerifier::get_file_ext(_req->getPath());
-	if (file_ext.empty() || _location.getCGI().count(file_ext))
+	file_ext = PathVerifier::get_file_ext(_req->getPath());
+	if (file_ext.empty() || _location->getCGI().count(file_ext))
 		return (false);
 	_cgi_ext = file_ext;
 	return (true);

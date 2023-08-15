@@ -103,6 +103,7 @@ private:
 	void	respond(void);
 
 	bool	checkCgiExistence(void);
+	void	cgi_handler(void);
 
 	// * Body producers
 	void	bodyProdcucers(void);
