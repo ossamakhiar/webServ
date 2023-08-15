@@ -46,7 +46,7 @@ public:
 	const std::vector<std::string>&	getAllowedMethods(void) const;
 	const std::vector<std::string>&	getIndexs(void) const;
 
-	std::map<std::string, std::string> getCGI(void)
+	std::map<std::string, std::string>& getCGI(void)
 	{
 		return (cgi);
 	}

@@ -16,6 +16,7 @@ Response::Response() : _client_socket(-1), _error_body(false), \
 	_vs(NULL), _location(NULL)
 {
 	_cgi_exists = false;
+	_cgi_ext = "";
 	_client_socket = -1;
 	_body_fd = -1;
 	_req = NULL;
@@ -91,7 +92,10 @@ void	Response::fillReasonPhrases(void)
 	_reason_phrase[OK] = "Ok";
 	_reason_phrase[MOVED_PERMANENTLY] = "Moved Permanently";
 	_reason_phrase[FORBIDDEN] = "Forbidden";
+	_reason_phrase[BAD_REQUEST] = "Bad Request";
 	_reason_phrase[NOT_FOUND] = "Not Found";
+	_reason_phrase[METHOD_NOT_ALLOWED] = "Method Not Allowed";
+	_reason_phrase[INTERNAL_SERVER_ERROR] = "Internal Server Error";
 }
 
 void Response::fillDefaultErrorPages(void)
@@ -157,7 +161,7 @@ std::string	Response::checkIndex(const std::string& path)
 		std::cout << "index path: \e[0m" << index_path << std::endl;
 		if (PathVerifier::path_exists(index_path)) // ! maybe you check also if it's a file
 			return (index_path);
-	}
+	}file_ext
 	return ("");
 }
 
@@ -297,32 +301,72 @@ void	Response::respond(void)
 // ** METHOD handlers
 void	Response::getHandler(void) // ? GET Request handler...
 {
+	std::string	rooted_path;
 
-
-
+	rooted_path = _req->getPhysicalPath();
 	if (_cgi_exists)
 	{
 		// set path to cgi output
-		return ;
+		// cgi_handler();
+		// rooted_path = _cgi_output;
+		// return ;
 	}
 	// fileServing(_req->getPhysicalPath());
 	// maybe here i should check the cgi maybe, maybe...
-	_body_fd = open(_req->getPhysicalPath().c_str(), O_RDONLY);
+	_body_fd = open(rooted.c_str(), O_RDONLY);
 
 	if (_body_fd == -1)
 		throw (INTERNAL_SERVER_ERROR);
+	// ? in case of extrnal file set the body type to external storage type
 	_stored_type = EXTERNAL_STORAGE;
 }
 
 
+void	Response::postHandler(void)
+{
+	// POST handler...
+	if (!_cgi_exists)
+		throw (FORBIDDEN);
+	
+}
+
 
 // ************* BODY PRODUCERS *********
+
+char	**cgi_env_setting(void)
+{
+	char	**env;
+
+	// cgi Env setting\
+
+	return (env);
+}
+
+void	Response::cgi_handler(void)
+{
+	int		pid;
+	char	**cgi_env;
+	char	*cgi_args[3];
+
+	cgi_env = cgi_env_setting();
+	cgi_args[0] = _location->getCGI().at(_cgi_ext).c_str();
+	cgi_args[1] = _req->getPhysicalPath().c_str();
+	cgi_args[2] = NULL;
+
+	pid = fork();
+	if (!pid)
+	{
+		execve(cgi_args[0], cgi_args, cgi_env);
+		exit(EXIT_FAILURE);
+	}
+}
 
 void	Response::checkErrorCode(int status_code) // ? Body producer
 {
 	//_error_body = true; // ? why this maybe i'll never neeed it
 	if (_error_pages.count(status_code))
 		_body = _error_pages[status_code];
+	// ? set the type of body to Buffer type
 	_stored_type = RAM_BUFFER;
 	respond(); // you should respond here because, it called in more than one case
 }
@@ -337,10 +381,23 @@ void	Response::DirectoryRequestedChecking(const std::string& path)
 		throw (MOVED_PERMANENTLY);
 	}
 	directoryServing(path); // ** server index, or directory listing on case of autoindex
+	// ? set type of body to Buffer type
 	_stored_type = RAM_BUFFER;
 	respond();
 }
 
+
+
+bool	checkCgiExistence(void)
+{
+	std::string	file_ext;
+
+	file_ext = PAthVerifier::get_file_ext(_req->getPath());
+	if (file_ext.empty() || _location.getCGI().count(file_ext))
+		return (false);
+	_cgi_ext = file_ext;
+	return (true);
+}
 
 void	Response::bodyProdcucers(void)
 {
@@ -365,10 +422,7 @@ void	Response::bodyProdcucers(void)
 	}
 
 	// ! check if a cgi and handle it
-	// if (_cgi)
-	// {
-	// 	// do blah blah
-	// }
+	_cgi_exists = checkCgiExistence();
 
 	(this->*_methods_handler[_request_method])();
 	respond();

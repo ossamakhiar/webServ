@@ -73,7 +73,8 @@ private:
 	const requestMessage	*_req;
 	std::string				_request_method;
 
-	bool	_cgi_exists;
+	bool		_cgi_exists;
+	std::string	_cgi_ext;
 
 	int		_stored_type;
 
@@ -100,11 +101,15 @@ private:
 	void	reponseSending(void);
 	void	responseHeader(void);
 	void	respond(void);
+
+	bool	checkCgiExistence(void);
+
 	// * Body producers
 	void	bodyProdcucers(void);
 
 	// * methods handlers
 	void	getHandler(void);
+	void	postHandler(void);
 
 	void	setRequest(const requestMessage&, int);
 
