@@ -53,6 +53,7 @@ void	Client::responseImportantSettings(void)
 	_response.setRequest(&_request);
 	_response.setStatusCode(_status_code);
 	_response.setRequestMethod(_request.getMethod());
+	// _response.setPhysicalPath();
 }
 
 // TODO :: client handler
@@ -87,8 +88,9 @@ void	Client::makeResponse(void)
 
 	try{
 		this->_response.buildResponse(client_socket);
-	} catch (std::exception& e) {
-		std::cout << e.what() << std::endl;
+	} catch (...) {
+		client_state = DISCONNECTED;
+		std::cout << "\e[1;31mClient Disconnected Something wrong happens\e[0m" << std::endl;
 	}
 
 	if (_response.getResponseState() == RESPONSE_DONE)

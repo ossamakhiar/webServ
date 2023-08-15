@@ -39,6 +39,7 @@ enum e_status_code
 	FORBIDDEN = 403,
 	NOT_FOUND = 404,
 	METHOD_NOT_ALLOWED = 405,
+	CONFLICT = 409,
 	REQUEST_ENTITY_TOO_LARGE = 413,
 	REQUEST_URI_TOO_LONG = 414,
 	INTERNAL_SERVER_ERROR = 500,
@@ -59,14 +60,14 @@ private:
 	std::string			_req_header;
 	std::vector<char>	_req_body;
 
-	std::string	_path, _query; //, _fragment;
+	std::string			_path, _query; //, _fragment;
+	std::string			_rooted_path;
 
 
 	// ? To define the server that client want to interact with.
 	std::vector<virtualServer*> &_vs_endpoint;
-	virtualServer		*&_vs;
-	locationBlock		*&_location;
-	// ? ******************************
+	virtualServer				*&_vs;
+	locationBlock				*&_location;
 
 	bool			_chunked;// ? transfer encoding body content case
 	bufferQueuing	TE_reader;
@@ -119,6 +120,7 @@ public:
 	void	setProperVS(void);
 	void	setLocation(void);
 	void	setImportantFields(void);
+	void	setPhysicalPath(void);
 
 	// * Getters
 	int					getReqState(void) const;
@@ -126,6 +128,7 @@ public:
 	const std::string&	getPath() const;
 	const std::string&	getQuery() const;
 	const std::string&	getMethod() const;
+	const std::string&	getPhysicalPath() const;
 
 	void	requestHandling(int client_sock);
 

@@ -190,3 +190,22 @@ void	Helpers::readFile(std::ifstream& is, ftString& str)
 	std::cout << "SIZEEEEe: " << size << std::endl;
     is.read(&str[0], size);
 }
+
+
+std::string	Helpers::to_string(size_t n)
+{
+	std::string		ret;
+	std::stringstream	ss;
+
+
+	ss << n;
+	ss >> ret;
+	return (ret);
+}
+
+// size_t		Helpers::fileSizeCalc(const char* file)
+// {
+// 	open(file, O_RDONLY);
+
+	
+// }

@@ -198,8 +198,8 @@ void	serverManager::IOSynchronous(void)
 {
 	while (1)
 	{
-		FD_COPY(&read_fds, &pre_read_fds);
-		FD_COPY(&write_fds, &pre_write_fds);
+		memcpy(&pre_read_fds, &read_fds, sizeof(fd_set));
+		memcpy(+&pre_write_fds, &write_fds, sizeof(fd_set));
 		if (select(highest_fd + 1, &pre_read_fds, &pre_write_fds, 0, 0) < 0)
 		{
 			std::cout << "Select failed\n";

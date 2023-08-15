@@ -55,6 +55,11 @@ const std::string&	requestMessage::getQuery() const
 	return (_query);
 }
 
+const std::string&	requestMessage::getPhysicalPath() const
+{
+	return (_rooted_path);
+}
+
 // TODO :: Setters
 std::string	requestMessage::pathExtracting(void)
 {
@@ -68,19 +73,6 @@ std::string	requestMessage::pathExtracting(void)
 	ret = _URI.substr(0, pos);
 	return (Helpers::precent_decoding(ret));
 }
-
-// std::string	requestMessage::fragmentExtracting(void)
-// {
-// 	std::string	fragment;
-// 	size_t		pos;
-
-// 	pos = _URI.find("#");
-// 	if (pos == std::string::npos)
-// 		return ("");
-// 	std::cout << "pos: " << pos << std::endl;
-// 	fragment = _URI.substr(pos, _URI.length() - pos);
-// 	return (Helpers::precent_decoding(fragment));
-// }
 
 std::string	requestMessage::queryExtracting()
 {
@@ -138,6 +130,19 @@ void	requestMessage::setProperVS(void)
 	for (std::vector<virtualServer*>::iterator it = _vs_endpoint.begin(); it != _vs_endpoint.end(); ++it)
 		if ((*it)->getEndpoint().first == _hostname.substr(0, _hostname.find(':')))
 			_vs = (*it);
+}
+
+void	requestMessage::setPhysicalPath(void)
+{
+	std::string	path;
+
+	// ** case of there no location match the requested path, join it with the root of the server
+	path = _location->getRoot();
+	if (path[path.length() - 1] == '/' && _path[0] == '/')
+		path.erase(path.length() - 1);
+	path += _path;
+
+	_rooted_path = path;
 }
 
 unsigned int	requestMessage::isPathMatch(std::string pattern, std::string path)
@@ -335,7 +340,7 @@ void	requestMessage::headerParsing(void)
 		_header_fields[field_key] = field_value;
 		i = pos + 2;
 	}
-	(setImportantFields(), setProperVS(), setLocation());
+	(setImportantFields(), setProperVS(), setLocation(), setPhysicalPath());
 	if (!isMethodAllowed())
 		throw (METHOD_NOT_ALLOWED);
 	if (_method == "POST" && !_header_fields.count("Content-Length") && !_header_fields.count("Transfer-Encoding"))

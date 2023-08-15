@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <netdb.h>
+#include <string.h>
 #include "locationBlock.hpp"
 
 

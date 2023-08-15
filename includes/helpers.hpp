@@ -19,6 +19,12 @@
 #include <vector>
 #include <stdexcept>
 #include <unistd.h>
+#include <limits.h>
+#include <cstdlib>
+#include <algorithm>
+#include <sstream>
+#include <unistd.h>
+#include <fcntl.h>
 #include "ftString.hpp"
 
 class Helpers
@@ -41,6 +47,8 @@ public:
 	static std::string	randomFileNameGen(void);
 	static std::string	precent_decoding(const std::string&);
 	static void			readFile(std::ifstream &is, ftString& str);
+	static std::string	to_string(size_t);
+	static size_t		fileSizeCalc(const char*);
 
 	static std::vector<std::string>	split(std::string str, const std::string& charset);
 

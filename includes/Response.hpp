@@ -20,6 +20,8 @@
 // #include "fString"
 #include "requestMessage.hpp"
 
+#define READ_BUFFER 8192
+
 enum e_responsing_states
 {
 	BODY_PRODUCING,
@@ -28,17 +30,24 @@ enum e_responsing_states
 	RESPONSE_DONE
 };
 
+enum e_stored_types
+{
+	RAM_BUFFER,
+	EXTERNAL_STORAGE
+};
+
 class Response
 {
 private:
 	typedef void (Response::*StationsPtr)(void);
 	typedef void (Response::*MethodHandler)(void);
 
+
 	int	_client_socket;
 
 	int	_content_len;
 
-	int	_responsing_state;
+	int										_responsing_state;
 	std::map<int, StationsPtr>				_stations;
 	std::map<std::string, MethodHandler>	_methods_handler;
 
@@ -51,6 +60,7 @@ private:
 	std::map<int, std::string>	_error_pages;
 
 	std::string	_redirection_path;
+	std::string	_resource_physical_path;
 
 	int			_body_fd;
 	std::string	_headers;
@@ -65,15 +75,19 @@ private:
 
 	bool	_cgi_exists;
 
+	int		_stored_type;
+
 
 
 	void	fillReasonPhrases(void);
 	void	fillDefaultErrorPages(void);
 	// std::vector<char>&	operator=(std::vector<char>& , const std::string&);
+	void	setContentLength(void);
 
 	std::string	checkIndex(const std::string&);
 	void		directoryListing(const std::string&);
 	void		directoryServing(const std::string&);
+	void		DirectoryRequestedChecking(const std::string&);
 
 	std::string	validateRootPath(const std::string&);
 
@@ -81,7 +95,9 @@ private:
 	// void	requestedPathServe(const requestMessage&);
 	void	fileServing(const std::string& path);
 
-	void	reposnseSending(void);
+	void	body_buffer_sending(void);
+	void	file_chunks_sending(void);
+	void	reponseSending(void);
 	void	responseHeader(void);
 	void	respond(void);
 	// * Body producers

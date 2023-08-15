@@ -14,6 +14,7 @@
 # define FTSTRING_HPP
 
 // #include "helpers.hpp"
+#include <string.h>
 #include <iostream>
 
 class ftString

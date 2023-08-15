@@ -4,7 +4,7 @@ SRCS = ./server/main.cpp ./server/configSyntax.cpp ./helpers/helpers.cpp ./serve
 		./server/core/requestMessage.cpp ./server/core/bufferQueuing.cpp ./helpers/ftString.cpp \
 		./server/core/Response.cpp ./helpers/PathVerifier.cpp
 OBJS = $(SRCS:.cpp=.o)
-CPP = c++
+CPP = clang++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 CPPFLAGS += -I./includes
 

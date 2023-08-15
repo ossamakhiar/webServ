@@ -19,6 +19,7 @@ Response::Response() : _client_socket(-1), _error_body(false), \
 	_client_socket = -1;
 	_body_fd = -1;
 	_req = NULL;
+	_content_len = 0;
 	_responsing_state = BODY_PRODUCING;
 	_stations[BODY_PRODUCING] = &Response::bodyProdcucers;
 
@@ -73,13 +74,17 @@ void	Response::setRequestMethod(const std::string& method)
 	_request_method = method;
 }
 
+// void	Response::setPhysicalPath(const std::)
+
 // TODO :: Getters
 int	Response::getResponseState(void) const
 {
 	return (_responsing_state);
 }
 
-// * Helpers
+
+
+// ************* Helpers ***************
 
 void	Response::fillReasonPhrases(void)
 {
@@ -112,6 +117,23 @@ std::string	Response::validateRootPath(const std::string& requested_path)
 	return (path);
 }
 
+void	Response::setContentLength(void)
+{
+	int		read_bytes;
+	char	buffer[READ_BUFFER + 1];
+
+	if (_stored_type == RAM_BUFFER)
+	{
+		_content_len = _body.length();
+		return ;
+	}
+
+	while ((read_bytes = read(_body_fd, buffer, READ_BUFFER)) > 0)
+		_content_len += read_bytes;
+	if (read_bytes == -1)
+		throw (INTERNAL_SERVER_ERROR);
+	lseek(_body_fd, (-1 * _content_len), SEEK_CUR);
+}
 
 
 
@@ -143,7 +165,7 @@ void	Response::directoryListing(const std::string& path)
 {
 	DIR				*dir_ptr;
 	struct dirent	*dir_entity;
-	std::string		html_doc = _html_start + "<h1>Director listing for " + path + "</h1>\n<hr>\n<ul>\n";
+	std::string		html_doc = _html_start + "<h1>Directory listing for " + path + "</h1>\n<hr>\n<ul>\n";
 
 	// * list the content of the directory (path)
 	if (_location && !_location->get_autoindex()) // ! if loactioon exist, and autoindex is off so FORBEDDIN
@@ -193,45 +215,73 @@ void	Response::directoryServing(const std::string& path)
 
 
 
-
 // ** RESPONSING Sending....
 
 void	Response::responseHeader(void)
 {
 	std::string	status_line;
 
-	status_line = "HTTP/1.1 " + std::to_string(_status_code) + " " + _reason_phrase[_status_code] + "\r\n";
+	status_line = "HTTP/1.1 " + Helpers::to_string(_status_code) + " " + _reason_phrase[_status_code] + "\r\n";
 	_headers = status_line;
 	if (_status_code == MOVED_PERMANENTLY)
 		_headers += "Location: " + _redirection_path + "\r\n";
 	_headers += "Connection: keep-alive\r\n";
-	_headers += "Content-Length: " + std::to_string(_body.length());
+	_headers += "Content-Length: " + Helpers::to_string(_content_len);
 	_headers += "\r\n\r\n";
+	std::cout << "\e[1;32mLength: \e[0m" << _content_len << std::endl;
 }
 
-void	Response::reposnseSending(void)
+void	Response::body_buffer_sending(void)
 {
-	int bytes = 0;
+	int	bytes;
 
-	if ((bytes = write(_client_socket, _body.c_str(), _content_len)) == -1)
-	{
-		perror("sending");
+	bytes = write(_client_socket, _body.c_str(), _body.length());
+	if (bytes <= 0)
 		throw (INTERNAL_SERVER_ERROR);
-	}
+}
 
-	if (bytes == 0)
-		throw (-1);
-	std::cout << "Bytes.: " << bytes  << " " << _content_len << std::endl;
-	_content_len -= bytes;
-	if (_content_len <= 0)
+void	Response::file_chunks_sending(void)
+{
+	int		read_bytes;
+	int		write_bytes;
+	char	buffer[READ_BUFFER + 1];
+
+
+	read_bytes = read(_body_fd, buffer, READ_BUFFER);
+
+	if (read_bytes == 0)
+	{
 		_responsing_state = RESPONSE_DONE;
-	_body = _body.substr(bytes);
+		return ;
+	}
+	if (read_bytes == -1)
+		throw (INTERNAL_SERVER_ERROR);
+	write_bytes = write(_client_socket, buffer, read_bytes);
+	if (write_bytes == 0)
+		throw (-1);
+	if (write_bytes == -1)
+		throw (INTERNAL_SERVER_ERROR);
+}
+
+void	Response::reponseSending(void)
+{
+	// int bytes = 0;
+
+	std::cout << "sending....\n";
+	if (_stored_type == RAM_BUFFER)
+	{
+		body_buffer_sending();
+		// ? set response state to DONE cause, buffered body is written at once
+		_responsing_state = RESPONSE_DONE;
+		return ;
+	}
+	file_chunks_sending();
 }
 
 void	Response::respond(void)
 {
 	// ! header making
-
+	setContentLength();
 	responseHeader();
 	std::cout << "header: " << _headers << "\n";
 
@@ -244,32 +294,24 @@ void	Response::respond(void)
 
 // **** END RESPONSING ****
 
-// ** method handlers
+// ** METHOD handlers
 void	Response::getHandler(void) // ? GET Request handler...
 {
-	std::string	path;
 
-	path = validateRootPath(_req->getPath());
-	std::cout  << "\e[1;32mPath: \e[0m" << path << std::endl;
-	if (!PathVerifier::path_exists(path))
-		throw (NOT_FOUND);
-	if (access(path.c_str(), F_OK | R_OK))
-		throw (FORBIDDEN);
-	if (PathVerifier::is_directory(path))
-	{
-		if (_req->getPath()[_req->getPath().length() - 1] != '/')
-		{
-			_redirection_path = _req->getPath() + "/";
-			throw (MOVED_PERMANENTLY);
-		}
-		directoryServing(path); // ** server index, or directory listing on case of autoindex
-		return ;
-	}
+
+
 	if (_cgi_exists)
 	{
 		// set path to cgi output
+		return ;
 	}
-	fileServing(path);
+	// fileServing(_req->getPhysicalPath());
+	// maybe here i should check the cgi maybe, maybe...
+	_body_fd = open(_req->getPhysicalPath().c_str(), O_RDONLY);
+
+	if (_body_fd == -1)
+		throw (INTERNAL_SERVER_ERROR);
+	_stored_type = EXTERNAL_STORAGE;
 }
 
 
@@ -281,43 +323,63 @@ void	Response::checkErrorCode(int status_code) // ? Body producer
 	//_error_body = true; // ? why this maybe i'll never neeed it
 	if (_error_pages.count(status_code))
 		_body = _error_pages[status_code];
+	_stored_type = RAM_BUFFER;
 	respond(); // you should respond here because, it called in more than one case
 }
 
-void	Response::fileServing(const std::string& path)
+void	Response::DirectoryRequestedChecking(const std::string& path)
 {
-	std::ifstream	file;
-	std::string		line;
-	// std::streamsize	size;
-
-	file.open(path.c_str(), std::ios::in);
-	if (!file.good())
-		throw (INTERNAL_SERVER_ERROR);
-	while (std::getline(file, line))
+	if (_req->getPath()[_req->getPath().length() - 1] != '/')
 	{
-		_body += line;
-		if (!file.eof())
-			_body += '\n';
+		if (_request_method == "DELETE")
+			throw (CONFLICT);
+		_redirection_path = _req->getPath() + "/";
+		throw (MOVED_PERMANENTLY);
 	}
-	file.close();
+	directoryServing(path); // ** server index, or directory listing on case of autoindex
+	_stored_type = RAM_BUFFER;
+	respond();
 }
+
 
 void	Response::bodyProdcucers(void)
 {
+	std::string	path;
+
 	if (_status_code != OK)
 	{
 		checkErrorCode(_status_code);// ! why i pass _status_code?
 		return ;
 	}
+
+	path = _req->getPhysicalPath();
+	std::cout  << "\e[1;32mPath: \e[0m" << path << std::endl;
+	if (!PathVerifier::path_exists(path))
+		throw (NOT_FOUND);
+	if (access(path.c_str(), F_OK | R_OK))
+		throw (FORBIDDEN);
+	if (PathVerifier::is_directory(path))
+	{
+		DirectoryRequestedChecking(path);
+		return ;
+	}
+
 	// ! check if a cgi and handle it
 	// if (_cgi)
 	// {
 	// 	// do blah blah
-	// } 
+	// }
 
 	(this->*_methods_handler[_request_method])();
 	respond();
 }
+
+
+
+
+
+
+
 
 
 
@@ -336,36 +398,13 @@ void	Response::buildResponse(int client_socket)
 		if (_responsing_state == BODY_PRODUCING)
 			bodyProdcucers();
 		else if (_responsing_state == RESPONSE_SENDING)
-			reposnseSending();
+			reponseSending();
 	} catch (e_status_code code) {
 		_status_code = code;
 		checkErrorCode(_status_code);
-		reposnseSending();
+		reponseSending();
 		_responsing_state = RESPONSE_DONE;
 	}
-	
-	// ** checking of status code, if is it not ok, respond with the associated page error
-	// checkErrorCode(status_code);
-	// ! if the body empty so there is no error, and check the requested URI
-	// if (!_error_body)
-	// 	requestedPathServe(req);
-
-	// for (size_t i = 0; i < _body.size(); ++i)
-	// 	std::cout << _body[i];
-	// std::cout << _body << std::endl;
-	// std::string responseHeaders = "HTTP/1.1 200 OK\r\n";
-    // responseHeaders += "Server: oussama khiar\r\n";
-    // responseHeaders += "Content-Length: " + std::to_string(_body.length()) + "\r\n";
-    // responseHeaders += "\r\n";
-
-	// std::cout << "client-socket: " << client_socket << std::endl;
-    // if (write(client_socket, responseHeaders.c_str(), responseHeaders.size()) < 0) {
-    //     throw std::runtime_error("Error writing response headers");
-    // }
-
-	// if (write(client_socket, _body.c_str(), _body.length()) == -1)
-	// 	throw std::runtime_error("SERVER DOWN");
-	// ! header construction 
 }
 
 
