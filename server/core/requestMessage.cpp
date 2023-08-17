@@ -60,6 +60,11 @@ const std::string&	requestMessage::getPhysicalPath() const
 	return (_rooted_path);
 }
 
+const std::map<std::string, std::string>&	requestMessage::getHeaderFields() const
+{
+	return (_header_fields);
+}
+
 // TODO :: Setters
 std::string	requestMessage::pathExtracting(void)
 {
@@ -82,6 +87,7 @@ std::string	requestMessage::queryExtracting()
 	pos = _URI.find("?");
 	if (pos == std::string::npos)
 		return ("");
+	pos++;
 	len = _URI.length() - pos;
 	query = _URI.substr(pos, len);
 	return (Helpers::precent_decoding(query));
@@ -194,7 +200,8 @@ void	requestMessage::openAndWrite(const char* data, size_t size, bool creation_f
 {
 	if (creation_flag)
 	{
-		body_fd = open((std::string("post/") + Helpers::randomFileNameGen()).c_str(), O_WRONLY | O_CREAT, 0666);
+		_post_body = std::string("post/") + Helpers::randomFileNameGen(); // store it
+		body_fd = open(_post_body.c_str(), O_WRONLY | O_CREAT, 0666);
 		if (body_fd == -1)
 			throw (INTERNAL_SERVER_ERROR);
 	}

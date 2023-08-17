@@ -93,6 +93,28 @@ std::string	Helpers::strTolower(const std::string& str)
 	return (ret);
 }
 
+std::string	Helpers::strToUpper(const std::string& str)
+{
+	std::string	ret;
+
+	ret = str;
+	for (size_t i = 0; i < str.length(); ++i)
+		if (ret[i] >= 97 && ret[i] <= 122)
+			ret[i] -= 32;
+	return (ret);
+}
+
+std::string	Helpers::findReplace(const std::string& str, const char& c, const char& replacement)
+{
+	std::string	ret;
+
+	ret = str;
+	for (size_t i = 0; i < ret.length(); ++i)
+		if (ret[i] == c)
+			ret[i] = replacement;
+	return (ret);
+}
+
 // ! make this more smarter
 char			Helpers::hexaToDecimal(const std::string& hex)
 {
@@ -202,10 +224,3 @@ std::string	Helpers::to_string(size_t n)
 	ss >> ret;
 	return (ret);
 }
-
-// size_t		Helpers::fileSizeCalc(const char* file)
-// {
-// 	open(file, O_RDONLY);
-
-	
-// }

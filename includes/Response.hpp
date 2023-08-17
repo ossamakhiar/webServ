@@ -14,6 +14,7 @@
 # define RESPONSE_HPP
 
 #include <dirent.h>
+#include <sys/wait.h>
 #include "helpers.hpp"
 #include "ftString.hpp"
 #include "PathVerifier.hpp"
@@ -73,8 +74,12 @@ private:
 	const requestMessage	*_req;
 	std::string				_request_method;
 
+	int			_cgi_pid;
+	// int			_cgi_body_fd;
 	bool		_cgi_exists;
 	std::string	_cgi_ext;
+	std::string	_cgi_outfile;
+	std::string	_cgi_headers;
 
 	int		_stored_type;
 
@@ -83,7 +88,6 @@ private:
 	void	fillReasonPhrases(void);
 	void	fillDefaultErrorPages(void);
 	// std::vector<char>&	operator=(std::vector<char>& , const std::string&);
-	void	setContentLength(void);
 
 	std::string	checkIndex(const std::string&);
 	void		directoryListing(const std::string&);
@@ -102,17 +106,25 @@ private:
 	void	responseHeader(void);
 	void	respond(void);
 
-	bool	checkCgiExistence(void);
-	void	cgi_handler(void);
+	std::vector<std::string> cgi_env_setting(void);
+	bool					checkCgiExistence(void);
+	void					cgi_handler(void);
+	void					redirect_cgi_output();
+
+	void					cgiWaiting(void);
 
 	// * Body producers
-	void	bodyProdcucers(void);
+	void	responsePrepering(void);
 
 	// * methods handlers
 	void	getHandler(void);
 	void	postHandler(void);
 
-	void	setRequest(const requestMessage&, int);
+	// * HELPERS
+	void		cgiHeaderExtracting(void);
+	void		setContentLength(void);
+	std::string	getScriptName() const;
+	void		setRequest(const requestMessage&, int);
 
 public:
 	Response();

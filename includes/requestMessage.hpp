@@ -44,6 +44,7 @@ enum e_status_code
 	REQUEST_URI_TOO_LONG = 414,
 	INTERNAL_SERVER_ERROR = 500,
 	METHOD_NOT_IMPLEMENTED = 501,
+	BAD_GATEWAY = 502,
 	HTTP_VERSION_NOT_SUPPORTED = 505,
 	// ! Maybe This Shouldn't be here
 	ZERO_READED = -1
@@ -53,7 +54,8 @@ enum e_status_code
 class requestMessage
 {
 private:
-	int body_fd; // ? file exist in case of POST body
+	int 		body_fd; // ? file exist in case of POST body
+	std::string	_post_body;
 
 	int					handling_state;
 	std::string			_req_message; // ** store the request message
@@ -123,12 +125,13 @@ public:
 	void	setPhysicalPath(void);
 
 	// * Getters
-	int					getReqState(void) const;
-	std::string			getURI(void) const;
-	const std::string&	getPath() const;
-	const std::string&	getQuery() const;
-	const std::string&	getMethod() const;
-	const std::string&	getPhysicalPath() const;
+	int									getReqState(void) const;
+	std::string							getURI(void) const;
+	const std::string&					getPath() const;
+	const std::string&					getQuery() const;
+	const std::string&					getMethod() const;
+	const std::string&					getPhysicalPath() const;
+	const std::map<std::string, std::string>&	getHeaderFields() const;
 
 	void	requestHandling(int client_sock);
 

@@ -84,7 +84,7 @@ void	Client::readRequest()
 
 void	Client::makeResponse(void)
 {
-	std::cout << "send request by meeeee\n";
+	// std::cout << "send request by meeeee\n";
 
 	try{
 		this->_response.buildResponse(client_socket);

@@ -49,6 +49,8 @@ public:
 	static void			readFile(std::ifstream &is, ftString& str);
 	static std::string	to_string(size_t);
 	static size_t		fileSizeCalc(const char*);
+	static std::string	strToUpper(const std::string&);
+	static std::string	findReplace(const std::string& str, const char& c, const char& replacement);
 
 	static std::vector<std::string>	split(std::string str, const std::string& charset);
 

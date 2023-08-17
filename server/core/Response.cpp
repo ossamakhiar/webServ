@@ -17,12 +17,14 @@ Response::Response() : _client_socket(-1), _error_body(false), \
 {
 	_cgi_exists = false;
 	_cgi_ext = "";
+	_cgi_pid = 0;
 	_client_socket = -1;
 	_body_fd = -1;
+	// _cgi_body_fd = -1;
 	_req = NULL;
 	_content_len = 0;
 	_responsing_state = BODY_PRODUCING;
-	_stations[BODY_PRODUCING] = &Response::bodyProdcucers;
+	_stations[BODY_PRODUCING] = &Response::responsePrepering;
 
 	_methods_handler["GET"] = &Response::getHandler;
 
@@ -34,7 +36,10 @@ Response::Response() : _client_socket(-1), _error_body(false), \
 
 Response::~Response()
 {
-	
+	if (_body_fd != -1)
+		close(_body_fd);
+	if (_cgi_exists)
+		unlink(_cgi_outfile.c_str());
 }
 
 Response::Response(const Response& other)
@@ -84,6 +89,22 @@ int	Response::getResponseState(void) const
 }
 
 
+std::string	Response::getScriptName() const
+{
+	size_t		pos;
+	std::string	script_name;
+
+	pos = _req->getPath().find_last_of("/");
+	if (pos == std::string::npos)
+		return ("");
+	pos++;
+	script_name = _req->getPath().substr(pos, _req->getPath().length() - pos);
+	return (script_name);
+}
+
+
+
+
 
 // ************* Helpers ***************
 
@@ -96,6 +117,7 @@ void	Response::fillReasonPhrases(void)
 	_reason_phrase[NOT_FOUND] = "Not Found";
 	_reason_phrase[METHOD_NOT_ALLOWED] = "Method Not Allowed";
 	_reason_phrase[INTERNAL_SERVER_ERROR] = "Internal Server Error";
+	_reason_phrase[BAD_GATEWAY] = "Bad gateway";
 }
 
 void Response::fillDefaultErrorPages(void)
@@ -107,6 +129,7 @@ void Response::fillDefaultErrorPages(void)
     _error_pages[NOT_FOUND] = "<html><body><h1>404 Not Found</h1><hr><p>The requested page was not found.</p></body></html>";
 	_error_pages[METHOD_NOT_ALLOWED] = "<html><body><h1>405 Method Not Allowed</h1><hr><p>The requested method is not allowed for this resource.</p></body></html>";
     _error_pages[INTERNAL_SERVER_ERROR] = "<html><body><h1>500 Internal Server Error</h1><hr><p>An internal server error occurred.</p></body></html>";
+    _error_pages[BAD_GATEWAY] = "<html><body><h1>502 Bad Gateway</h1><hr><p>Bad Gateway.</p></body></html>";
 }
 
 std::string	Response::validateRootPath(const std::string& requested_path)
@@ -121,6 +144,26 @@ std::string	Response::validateRootPath(const std::string& requested_path)
 	return (path);
 }
 
+void	Response::cgiHeaderExtracting(void)
+{
+	int		read_bytes;
+	size_t	pos;
+	char	buffer[READ_BUFFER + 1];
+
+	read_bytes = read(_body_fd, buffer, READ_BUFFER);
+
+	if (read_bytes <= 0)
+		throw (INTERNAL_SERVER_ERROR);
+	buffer[read_bytes] = '\0';
+	_cgi_headers = buffer;
+	if ((pos = _cgi_headers.find("\r\n\r\n")) == std::string::npos)
+		throw (BAD_GATEWAY);
+	_cgi_headers = _cgi_headers.substr(0, pos + 4);
+	lseek(_body_fd, _cgi_headers.length() - read_bytes, SEEK_CUR);
+
+	//parse cgi headers
+}
+
 void	Response::setContentLength(void)
 {
 	int		read_bytes;
@@ -131,6 +174,8 @@ void	Response::setContentLength(void)
 		_content_len = _body.length();
 		return ;
 	}
+	if (_cgi_exists)
+		cgiHeaderExtracting();
 
 	while ((read_bytes = read(_body_fd, buffer, READ_BUFFER)) > 0)
 		_content_len += read_bytes;
@@ -138,6 +183,20 @@ void	Response::setContentLength(void)
 		throw (INTERNAL_SERVER_ERROR);
 	lseek(_body_fd, (-1 * _content_len), SEEK_CUR);
 }
+
+
+bool	Response::checkCgiExistence(void)
+{
+	std::string	file_ext;
+
+	file_ext = PathVerifier::get_file_ext(_req->getPath());
+	if (file_ext.empty() || !_location->getCGI().count(file_ext))
+		return (false);
+	_cgi_ext = file_ext;
+	return (true);
+}
+
+
 
 
 
@@ -231,6 +290,11 @@ void	Response::responseHeader(void)
 		_headers += "Location: " + _redirection_path + "\r\n";
 	_headers += "Connection: keep-alive\r\n";
 	_headers += "Content-Length: " + Helpers::to_string(_content_len);
+	if (_cgi_exists)
+	{
+		_headers += "\r\n";
+		_headers += _cgi_headers.substr(0, _cgi_headers.length() - 4);
+	}
 	_headers += "\r\n\r\n";
 	std::cout << "\e[1;32mLength: \e[0m" << _content_len << std::endl;
 }
@@ -262,7 +326,7 @@ void	Response::file_chunks_sending(void)
 		throw (INTERNAL_SERVER_ERROR);
 	write_bytes = write(_client_socket, buffer, read_bytes);
 	if (write_bytes == 0)
-		throw (-1);
+		throw (-1); // here...
 	if (write_bytes == -1)
 		throw (INTERNAL_SERVER_ERROR);
 }
@@ -292,11 +356,17 @@ void	Response::respond(void)
 	// ! Sending state setting
 	if (write(_client_socket, _headers.c_str(), _headers.size()) < 0)
         throw (INTERNAL_SERVER_ERROR);
-	_content_len = _body.length();
+	// _content_len = _body.length();
 	_responsing_state = RESPONSE_SENDING;
 }
 
 // **** END RESPONSING ****
+
+
+
+
+
+
 
 // ** METHOD handlers
 void	Response::getHandler(void) // ? GET Request handler...
@@ -304,11 +374,12 @@ void	Response::getHandler(void) // ? GET Request handler...
 	std::string	rooted_path;
 
 	rooted_path = _req->getPhysicalPath();
+	std::cout << "I'm here.. Good\n";
 	if (_cgi_exists)
 	{
 		// set path to cgi output
-		// cgi_handler();
-		// rooted_path = _cgi_output;
+		cgi_handler();
+		rooted_path = _cgi_outfile;
 		// return ;
 	}
 	// fileServing(_req->getPhysicalPath());
@@ -333,43 +404,13 @@ void	Response::postHandler(void)
 
 // ************* BODY PRODUCERS *********
 
-char	**cgi_env_setting(void)
-{
-	char	**env = NULL;
-
-	// cgi Env setting
-
-	return (env);
-}
-
-void	Response::cgi_handler(void)
-{
-	int			pid;
-	char		**cgi_env;
-	const char	*cgi_args[3];
-
-	cgi_env = cgi_env_setting();
-	cgi_args[0] = _location->getCGI().at(_cgi_ext).c_str();
-	cgi_args[1] = _req->getPhysicalPath().c_str();
-	cgi_args[2] = NULL;
-
-	pid = fork();
-	if (!pid)
-	{
-		if (_request_method == "POST")
-		{
-			// dup2 cgi input to the post body file
-		}
-		execve(cgi_args[0], cgi_args, cgi_env);
-		exit(EXIT_FAILURE);
-	}
-}
-
 void	Response::checkErrorCode(int status_code) // ? Body producer
 {
 	//_error_body = true; // ? why this maybe i'll never neeed it
 	if (_error_pages.count(status_code))
 		_body = _error_pages[status_code];
+	else
+		_body = "no Default error page for " + Helpers::to_string(status_code) + "\n";
 	// ? set the type of body to Buffer type
 	_stored_type = RAM_BUFFER;
 	respond(); // you should respond here because, it called in more than one case
@@ -390,20 +431,12 @@ void	Response::DirectoryRequestedChecking(const std::string& path)
 	respond();
 }
 
+// CGI ON Cgi.cpp file ==> also body producer
+// ************************************** 
 
 
-bool	Response::checkCgiExistence(void)
-{
-	std::string	file_ext;
 
-	file_ext = PathVerifier::get_file_ext(_req->getPath());
-	if (file_ext.empty() || _location->getCGI().count(file_ext))
-		return (false);
-	_cgi_ext = file_ext;
-	return (true);
-}
-
-void	Response::bodyProdcucers(void)
+void	Response::responsePrepering(void)
 {
 	std::string	path;
 
@@ -429,11 +462,29 @@ void	Response::bodyProdcucers(void)
 	_cgi_exists = checkCgiExistence();
 
 	(this->*_methods_handler[_request_method])();
-	respond();
+	if (!_cgi_exists)
+		respond();
 }
 
 
+void	Response::cgiWaiting()
+{
+	int	sys_ret;
+	int	status;
 
+	sys_ret = waitpid(_cgi_pid, &status, WNOHANG);
+	if (sys_ret == -1)
+	{
+		kill(_cgi_pid, SIGTERM);
+		throw (INTERNAL_SERVER_ERROR);
+	}
+	if (sys_ret == 0)
+		return ;
+	if (!WIFEXITED(status) || WEXITSTATUS(status) == EXIT_FAILURE)
+		throw (INTERNAL_SERVER_ERROR);
+	std::cout << "\e[1;32mCGI DONE HIS WORK\e[0m" << std::endl;
+	respond();
+}
 
 
 
@@ -451,12 +502,14 @@ void	Response::buildResponse(int client_socket)
 	// if (_client_socket == -1)
 	_client_socket = client_socket;
 
-	std::cout << "\e[1;33mbuilding response call..................\e[0m" << client_socket << std::endl;
+	// std::cout << "\e[1;33mbuilding response call..................\e[0m" << client_socket << std::endl;
 	try {
 		if (_responsing_state == BODY_PRODUCING)
-			bodyProdcucers();
+			responsePrepering();
 		else if (_responsing_state == RESPONSE_SENDING)
 			reponseSending();
+		else if (_responsing_state == CGI_WAITING)
+			cgiWaiting();
 	} catch (e_status_code code) {
 		_status_code = code;
 		checkErrorCode(_status_code);
