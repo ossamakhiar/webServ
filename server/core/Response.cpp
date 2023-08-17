@@ -12,7 +12,7 @@
 
 #include "Response.hpp"
 
-Response::Response() : _client_socket(-1), _error_body(false), \
+Response::Response() : _client_socket(-1), \
 	_vs(NULL), _location(NULL)
 {
 	_cgi_exists = false;
@@ -406,7 +406,6 @@ void	Response::postHandler(void)
 
 void	Response::checkErrorCode(int status_code) // ? Body producer
 {
-	//_error_body = true; // ? why this maybe i'll never neeed it
 	if (_error_pages.count(status_code))
 		_body = _error_pages[status_code];
 	else

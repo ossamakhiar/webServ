@@ -55,72 +55,64 @@ private:
 	std::string	_html_start;
 	std::string	_html_close;
 
-	bool	_error_body;
-
 	std::map<int, std::string>	_reason_phrase; // ** map a status code with it reason
 	std::map<int, std::string>	_error_pages;
 
-	std::string	_redirection_path;
-	std::string	_resource_physical_path;
+	std::string					_redirection_path;
+	std::string					_resource_physical_path;
 
-	int			_body_fd;
-	std::string	_headers;
-	std::string	_body; // ? response body, ftString, a raw data buffer it cares about the it length only
+	int							_body_fd;
+	std::string					_headers;
+	std::string					_body; // ? response body, ftString, a raw data buffer it cares about the it length only
 
-	virtualServer	*_vs;
-	locationBlock	*_location;
+	virtualServer				*_vs;
+	locationBlock				*_location;
 
-	int						_status_code;
-	const requestMessage	*_req;
-	std::string				_request_method;
+	int							_status_code;
+	const requestMessage		*_req;
+	std::string					_request_method;
 
-	int			_cgi_pid;
-	// int			_cgi_body_fd;
-	bool		_cgi_exists;
-	std::string	_cgi_ext;
-	std::string	_cgi_outfile;
-	std::string	_cgi_headers;
+	int							_cgi_pid;
+	bool						_cgi_exists;
+	std::string					_cgi_ext;
+	std::string					_cgi_outfile;
+	std::string					_cgi_headers;
 
-	int		_stored_type;
-
+	int							_stored_type;
 
 
-	void	fillReasonPhrases(void);
-	void	fillDefaultErrorPages(void);
-	// std::vector<char>&	operator=(std::vector<char>& , const std::string&);
 
-	std::string	checkIndex(const std::string&);
-	void		directoryListing(const std::string&);
-	void		directoryServing(const std::string&);
-	void		DirectoryRequestedChecking(const std::string&);
 
-	std::string	validateRootPath(const std::string&);
+	std::string					checkIndex(const std::string&);
+	void						directoryListing(const std::string&);
+	void						directoryServing(const std::string&);
+	void						DirectoryRequestedChecking(const std::string&);
 
-	void	checkErrorCode(int);
-	// void	requestedPathServe(const requestMessage&);
-	void	fileServing(const std::string& path);
 
-	void	body_buffer_sending(void);
-	void	file_chunks_sending(void);
-	void	reponseSending(void);
-	void	responseHeader(void);
-	void	respond(void);
+	void						checkErrorCode(int);
 
-	std::vector<std::string> cgi_env_setting(void);
-	bool					checkCgiExistence(void);
-	void					cgi_handler(void);
-	void					redirect_cgi_output();
+	void						body_buffer_sending(void);
+	void						file_chunks_sending(void);
+	void						reponseSending(void);
+	void						responseHeader(void);
+	void						respond(void);
 
-	void					cgiWaiting(void);
+	std::vector<std::string>	cgi_env_setting(void);
+	bool						checkCgiExistence(void);
+	void						redirect_cgi_output();
+	void						cgi_handler(void);
 
-	// * Body producers
-	void	responsePrepering(void);
+	void						cgiWaiting(void);
+	void						responsePrepering(void);
 
 	// * methods handlers
 	void	getHandler(void);
 	void	postHandler(void);
 
 	// * HELPERS
+	void		fillReasonPhrases(void);
+	void		fillDefaultErrorPages(void);
+	std::string	validateRootPath(const std::string&);
 	void		cgiHeaderExtracting(void);
 	void		setContentLength(void);
 	std::string	getScriptName() const;
