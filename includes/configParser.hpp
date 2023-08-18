@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <iostream>
+#include "PathVerifier.hpp"
 #include "configSyntax.hpp"
 #include "virtualServer.hpp"
 
@@ -35,6 +36,7 @@ private:
 	size_t			parseLocationBlock(virtualServer&, const std::string&);
 	size_t			parseDirectives(virtualServer&, const std::string&, int&);
 	virtualServer	parseServerBlock(std::string& buffer);
+	bool			checkLocationDepend(const std::map<std::string, locationBlock>& locations);
 
 	configParser(const configParser& other);
 	configParser&	operator=(const configParser& rhs);

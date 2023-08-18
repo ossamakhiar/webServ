@@ -98,11 +98,14 @@ private:
 
 	std::vector<std::string>	cgi_env_setting(void);
 	bool						checkCgiExistence(void);
+	void						redirect_cgi_input(void);
 	void						redirect_cgi_output();
 	void						cgi_handler(void);
 
 	void						cgiWaiting(void);
 	void						responsePrepering(void);
+
+	void	fileServing(void);
 
 	// * methods handlers
 	void	getHandler(void);

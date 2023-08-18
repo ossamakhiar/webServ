@@ -28,6 +28,7 @@ configParser::configParser(const std::string& file_name)
 	locationDirectives.insert(std::pair<std::string, ldSeter>("cgi", &locationBlock::setCgi));
 	locationDirectives.insert(std::pair<std::string, ldSeter>("autoindex", &locationBlock::setDirListing));
 	locationDirectives.insert(std::pair<std::string, ldSeter>("index", &locationBlock::setIndex));
+	locationDirectives.insert(std::pair<std::string, ldSeter>("upload_post", &locationBlock::setUploadPost));
 	// locationDirectives.insert(std::pair<std::string, int>("upload_post", 1));
 
 	// ** Server Directives DB
@@ -124,6 +125,17 @@ virtualServer	configParser::parseServerBlock(std::string& buffer)
 	return (vs);
 }
 
+bool			configParser::checkLocationDepend(const std::map<std::string, locationBlock>& locations)
+{
+	for (std::map<std::string, locationBlock>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		// std::cout << it->second.getUploadPost() << std::endl;
+		if (Helpers::findElement(it->second.getAllowedMethods(), "POST") && it->second.getUploadPost().empty())
+			return (false);
+	}
+	return (true);
+}
+
 std::vector<virtualServer>	configParser::parseConfiguration(void)
 {
 	std::vector<virtualServer>	virtualServers;
@@ -139,6 +151,9 @@ std::vector<virtualServer>	configParser::parseConfiguration(void)
 			throw std::runtime_error("listen directive required in server block");
 		if (virtualServers.back().getRootDir().empty())
 			throw std::runtime_error("root dierctive required in server block");
+		// if (Helpers::findElement(virtualServers.back().getAllowedMethods(), "POST") && virtualServers.back().getUploadPost().empty())
+		if (!checkLocationDepend(virtualServers.back().getLocations()))
+			throw std::runtime_error("With POST method Upload post required");
 		// ! set the default root to the location taken from the server root
 		skippedLines = buffer.find_first_not_of("\n");
 		// ** skipped new line that stay in the string to avoid extra call

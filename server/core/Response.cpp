@@ -27,6 +27,7 @@ Response::Response() : _client_socket(-1), \
 	_stations[BODY_PRODUCING] = &Response::responsePrepering;
 
 	_methods_handler["GET"] = &Response::getHandler;
+	_methods_handler["POST"] = &Response::postHandler;
 
 	_html_start = "<html>\n<head>\n<title>page--</title><head>\n<body>";
 	_html_close = "</body>\n</html>";
@@ -97,7 +98,7 @@ std::string	Response::getScriptName() const
 	pos = _req->getPath().find_last_of("/");
 	if (pos == std::string::npos)
 		return ("");
-	pos++;
+	// pos += 1;
 	script_name = _req->getPath().substr(pos, _req->getPath().length() - pos);
 	return (script_name);
 }
@@ -111,6 +112,7 @@ std::string	Response::getScriptName() const
 void	Response::fillReasonPhrases(void)
 {
 	_reason_phrase[OK] = "Ok";
+	_reason_phrase[OK] = "Created";
 	_reason_phrase[MOVED_PERMANENTLY] = "Moved Permanently";
 	_reason_phrase[FORBIDDEN] = "Forbidden";
 	_reason_phrase[BAD_REQUEST] = "Bad Request";
@@ -122,6 +124,7 @@ void	Response::fillReasonPhrases(void)
 
 void Response::fillDefaultErrorPages(void)
 {
+	_error_pages[CREATED] = "<html><body><h1>201 Created</h1><hr><p>The resource has been created successfully.</p></body></html>";
 	_error_pages[MOVED_PERMANENTLY] = "<html><body><h1>301 Moved Permanently</h1><hr><p>The resource has been moved permanently.</p></body></html>";
     _error_pages[BAD_REQUEST] = "<html><body><h1>400 Bad Request</h1><hr><p>Your request was invalid.</p></body></html>";
     _error_pages[401] = "<html><body><h1>401 Unauthorized</h1><hr><p>You are not authorized to access this resource.</p></body></html>";
@@ -145,7 +148,8 @@ std::string	Response::validateRootPath(const std::string& requested_path)
 }
 
 void	Response::cgiHeaderExtracting(void)
-{
+{	_reason_phrase[OK] = "Ok";
+
 	int		read_bytes;
 	size_t	pos;
 	char	buffer[READ_BUFFER + 1];
@@ -363,13 +367,7 @@ void	Response::respond(void)
 // **** END RESPONSING ****
 
 
-
-
-
-
-
-// ** METHOD handlers
-void	Response::getHandler(void) // ? GET Request handler...
+void	Response::fileServing(void)
 {
 	std::string	rooted_path;
 
@@ -382,7 +380,8 @@ void	Response::getHandler(void) // ? GET Request handler...
 		rooted_path = _cgi_outfile;
 		// return ;
 	}
-	// fileServing(_req->getPhysicalPath());
+	if (_request_method == "POST" && !_cgi_exists)
+		throw (CREATED);
 	// maybe here i should check the cgi maybe, maybe...
 	_body_fd = open(rooted_path.c_str(), O_RDONLY);
 
@@ -393,12 +392,35 @@ void	Response::getHandler(void) // ? GET Request handler...
 }
 
 
+
+
+
+// ** METHOD handlers
+void	Response::getHandler(void) // ? GET Request handler...
+{
+	if (PathVerifier::is_file(_req->getPhysicalPath()))
+		fileServing();
+	_stored_type = EXTERNAL_STORAGE;
+	if (PathVerifier::is_directory(_req->getPhysicalPath()))
+	{
+		directoryServing(_req->getPhysicalPath()); // ** server index, or directory listing on case of autoindex
+		// ? set type of body to Buffer type
+		_stored_type = RAM_BUFFER;
+		// respond();
+		// return ;
+	}
+}
+
+
 void	Response::postHandler(void)
 {
 	// POST handler...
-	if (!_cgi_exists)
-		throw (FORBIDDEN);
-	
+	if (PathVerifier::is_file(_req->getPhysicalPath()))
+	{
+		fileServing();
+		return ;
+	}
+	throw (FORBIDDEN);
 }
 
 
@@ -424,10 +446,11 @@ void	Response::DirectoryRequestedChecking(const std::string& path)
 		_redirection_path = _req->getPath() + "/";
 		throw (MOVED_PERMANENTLY);
 	}
-	directoryServing(path); // ** server index, or directory listing on case of autoindex
-	// ? set type of body to Buffer type
-	_stored_type = RAM_BUFFER;
-	respond();
+	// directoryServing(path); // ** server index, or directory listing on case of autoindex
+	// // ? set type of body to Buffer type
+	// _stored_type = RAM_BUFFER;
+	// respond();
+	(void)path;
 }
 
 // CGI ON Cgi.cpp file ==> also body producer
@@ -452,10 +475,7 @@ void	Response::responsePrepering(void)
 	if (access(path.c_str(), F_OK | R_OK))
 		throw (FORBIDDEN);
 	if (PathVerifier::is_directory(path))
-	{
 		DirectoryRequestedChecking(path);
-		return ;
-	}
 
 	// ! check if a cgi and handle it
 	_cgi_exists = checkCgiExistence();
@@ -510,6 +530,7 @@ void	Response::buildResponse(int client_socket)
 		else if (_responsing_state == CGI_WAITING)
 			cgiWaiting();
 	} catch (e_status_code code) {
+		// std::cout << "I'm Here baby\n" << std::endl;
 		_status_code = code;
 		checkErrorCode(_status_code);
 		reponseSending();

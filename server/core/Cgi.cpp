@@ -26,6 +26,7 @@ std::vector<std::string> Response::cgi_env_setting(void)
     env.push_back("SCRIPT_FILENAME=" + _req->getPhysicalPath());
     env.push_back("REDIRECT_STATUS=200");
     env.push_back("REQUEST_URI=" + _req->getURI());
+	// env.push_back("CONTENT_TYPE=application/x-www-form-urlencoded");
 
 	for (std::map<std::string, std::string>::const_iterator it = _req->getHeaderFields().begin(); it != _req->getHeaderFields().end(); ++it)
 	{
@@ -34,7 +35,8 @@ std::vector<std::string> Response::cgi_env_setting(void)
 		key = it->first;
 		key = Helpers::strToUpper(key);
 		key = Helpers::findReplace(key, '-', '_'); // ! problem here..
-		key = "HTTP_" + key;
+		if (key != "CONTENT_TYPE" && key  != "CONTENT_LENGTH")
+			key = "HTTP_" + key;
 		key += "=";
 		key += it->second;
 		env.push_back(key);
@@ -51,6 +53,25 @@ void	Response::redirect_cgi_output()
 
 	if (dup2(fd, 1) == -1)
 		exit(EXIT_FAILURE);
+}
+
+void	Response::redirect_cgi_input(void)
+{
+	int	fd;
+
+	std::cout << ">>>>"  << _req->getPostBodyFile() << std::endl;
+	fd = open(_req->getPostBodyFile().c_str(), O_RDONLY);
+	std::cout << "fd:     >>>> " << fd << std::endl;
+	if (fd == -1)
+	{
+		std::cerr << "\e[1;31mcan't open file....\e[0m" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	if (dup2(fd, 0) == -1)
+	{
+		std::cerr << "\e[1;31mcan't dup....\e[0m" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
 void	Response::cgi_handler(void)
@@ -72,12 +93,13 @@ void	Response::cgi_handler(void)
 
 	_cgi_pid = fork();
 	if (_cgi_pid != 0)
-		usleep(100);
+		usleep(10000);
 	if (!_cgi_pid)
 	{
 		if (_request_method == "POST")
 		{
 			// dup2 cgi input to the post body file
+			redirect_cgi_input();
 		}
 		redirect_cgi_output();
 		execve(cgi_args[0], cgi_args, cgi_env);

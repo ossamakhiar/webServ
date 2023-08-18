@@ -42,7 +42,7 @@ bool	configSyntax::isComment(const std::string& line)
 
 bool	configSyntax::locationLine(const std::vector<std::string>& tokens)
 {
-	return (tokens.size() == (2 + (tokens.back() == "{")));
+	return (tokens.size() == (size_t)(2 + (tokens.back() == "{")));
 }
 
 bool	configSyntax::directiveOperations(std::map<std::string, int>::iterator it, const std::string& token, size_t size)

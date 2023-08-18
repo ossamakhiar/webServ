@@ -181,6 +181,13 @@ void	serverManager::serveClients(void)
 		{
 			it->second->makeResponse();
 			// TODO :: check if it's a presistent connection & handle it
+			if (it->second->getState() == DISCONNECTED)
+			{
+				dropClient(fd);// ** BYE BYE
+				FD_CLR(fd, &read_fds);
+				keys_erase.push_back(fd);
+				continue ;
+			}
 			if (it->second->getState() == CLIENT_DONE)
 			{
 				dropClient(fd);

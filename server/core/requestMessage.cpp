@@ -65,6 +65,11 @@ const std::map<std::string, std::string>&	requestMessage::getHeaderFields() cons
 	return (_header_fields);
 }
 
+const std::string&	requestMessage::getPostBodyFile() const
+{
+	return (_post_body);
+}
+
 // TODO :: Setters
 std::string	requestMessage::pathExtracting(void)
 {
@@ -144,10 +149,14 @@ void	requestMessage::setPhysicalPath(void)
 
 	// ** case of there no location match the requested path, join it with the root of the server
 	path = _location->getRoot();
+	std::cout << ">>>>" << path << std::endl;
+	if (path[path.length() - 1] != '/' && _path[0] != '/')
+		path += "/";
 	if (path[path.length() - 1] == '/' && _path[0] == '/')
-		path.erase(path.length() - 1);
+		path = path.substr(0, path.length() - 1);
 	path += _path;
 
+	std::cout << "\e[1;32mPAAAAAAATH: \e[0m" << path << std::endl;
 	_rooted_path = path;
 }
 
@@ -200,7 +209,7 @@ void	requestMessage::openAndWrite(const char* data, size_t size, bool creation_f
 {
 	if (creation_flag)
 	{
-		_post_body = std::string("post/") + Helpers::randomFileNameGen(); // store it
+		_post_body = _location->getUploadPost() + Helpers::randomFileNameGen(); // store it
 		body_fd = open(_post_body.c_str(), O_WRONLY | O_CREAT, 0666);
 		if (body_fd == -1)
 			throw (INTERNAL_SERVER_ERROR);

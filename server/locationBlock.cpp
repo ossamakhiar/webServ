@@ -37,6 +37,7 @@ locationBlock&	locationBlock::operator=(const locationBlock& rhs)
 	index = rhs.index;
 	root = rhs.root;
 	cgi = rhs.cgi;
+	_upload_post = rhs._upload_post;
 	return (*this);
 }
 
@@ -84,6 +85,19 @@ void	locationBlock::setIndex(const std::string& inpt)
 	index = tokens;
 }
 
+void	locationBlock::setUploadPost(const std::string& str)
+{
+	std::string	upload;
+
+	upload = Helpers::trim(str);
+	if (upload[upload.length() - 1] != '/')
+		upload.append("/");
+	if (!PathVerifier::is_directory(upload))
+		throw std::runtime_error("Upload post is not directory -_-");
+	// std::cout << upload << std::endl;
+	_upload_post = upload;
+}
+
 // TODO :: Getters
 
 bool	locationBlock::get_autoindex(void) const
@@ -104,6 +118,11 @@ const std::vector<std::string>&	locationBlock::getAllowedMethods() const
 const std::vector<std::string>&	locationBlock::getIndexs(void) const
 {
 	return (index);
+}
+
+const std::string&	locationBlock::getUploadPost(void) const
+{
+	return (_upload_post);
 }
 
 

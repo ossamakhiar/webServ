@@ -34,6 +34,7 @@ enum e_handling_states
 enum e_status_code
 {
 	OK = 200,
+	CREATED = 201,
 	MOVED_PERMANENTLY = 301,
 	BAD_REQUEST = 400,
 	FORBIDDEN = 403,
@@ -131,6 +132,7 @@ public:
 	const std::string&							getMethod() const;
 	const std::string&							getPhysicalPath() const;
 	const std::map<std::string, std::string>&	getHeaderFields() const;
+const std::string&								getPostBodyFile() const;
 
 	void	requestHandling(int client_sock);
 
