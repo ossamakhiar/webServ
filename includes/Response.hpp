@@ -42,18 +42,17 @@ class Response
 private:
 	typedef void (Response::*StationsPtr)(void);
 	typedef void (Response::*MethodHandler)(void);
-
+	std::string	_html_start;
+	std::string	_html_close;
 
 	int	_client_socket;
-
 	int	_content_len;
+
 
 	int										_responsing_state;
 	std::map<int, StationsPtr>				_stations;
 	std::map<std::string, MethodHandler>	_methods_handler;
 
-	std::string	_html_start;
-	std::string	_html_close;
 
 	std::map<int, std::string>	_reason_phrase; // ** map a status code with it reason
 	std::map<int, std::string>	_error_pages;
@@ -125,7 +124,7 @@ public:
 	Response&	operator=(const Response&);
 
 	// * getters
-	int	getResponseState(void) const;
+	int		getResponseState(void) const;
 
 	// * setters
 	void	setVS(virtualServer*);

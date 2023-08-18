@@ -31,35 +31,33 @@ enum e_client_states
 class Client
 {
 private:
-	int					client_state;
-	int					client_socket;
-	struct sockaddr_in	client_addr;
+	int							client_state;
+	int							client_socket;
+	struct sockaddr_in			client_addr;
 
 	std::vector<virtualServer*>	&_vs_endpoint;
-	virtualServer		*_vs;// ** vServer That client communicate to
-	locationBlock		*_location; // ** set the related location to a URI if it's exist..
-	std::string			_path;
+	virtualServer				*_vs;// ** vServer That client communicate to
+	locationBlock				*_location; // ** set the related location to a URI if it's exist..
+	std::string					_path;
 
-	requestMessage		_request;
-	e_status_code		_status_code;
+	requestMessage				_request;
+	e_status_code				_status_code;
 
-	Response			_response;
+	Response					_response;
 
 	Client(const Client& other);
 	Client& operator=(const Client& rhs);
 public:
 	Client(int fd, struct sockaddr_in addr, std::vector<virtualServer*>	&);
-	// Client();
 	~Client();
 
 	// TODO :: Setters
-	void	setVS(virtualServer *vs);
+	void			setVS(virtualServer *vs);
 
 	// TODO :: Getters
 	virtualServer	*getVS(void) const;
 	int				getState(void) const;
 	void			responseImportantSettings(void);
-	// int				getResponseState(void) const;
 
 	void	readRequest(void);
 	void	makeResponse(void);

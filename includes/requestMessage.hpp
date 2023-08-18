@@ -54,16 +54,16 @@ enum e_status_code
 class requestMessage
 {
 private:
-	int 		body_fd; // ? file exist in case of POST body
-	std::string	_post_body;
+	int 						body_fd; // ? file exist in case of POST body
+	std::string					_post_body;
 
-	int					handling_state;
-	std::string			_req_message; // ** store the request message
-	std::string			_req_header;
-	std::vector<char>	_req_body;
+	int							handling_state;
+	std::string					_req_message; // ** store the request message
+	std::string					_req_header;
+	std::vector<char>			_req_body;
 
-	std::string			_path, _query; //, _fragment;
-	std::string			_rooted_path;
+	std::string					_path, _query; //, _fragment;
+	std::string					_rooted_path;
 
 
 	// ? To define the server that client want to interact with.
@@ -71,31 +71,30 @@ private:
 	virtualServer				*&_vs;
 	locationBlock				*&_location;
 
-	bool			_chunked;// ? transfer encoding body content case
-	bufferQueuing	TE_reader;
+	bool						_chunked;// ? transfer encoding body content case
+	bufferQueuing				TE_reader;
 
 	std::map<std::string, std::string> _header_fields;
 
-	bool		_presistent_con;
-	int			_content_len; // ! mandatory in case request has a body message
-	std::string	_hostname; // ! make it mandatory :)
-	std::string	_method, _URI;
+	bool						_presistent_con;
+	int							_content_len; // ! mandatory in case request has a body message
+	std::string					_hostname; // ! make it mandatory :)
+	std::string					_method, _URI;
 
 
 	// ** private members function
-	size_t	request_line(void);
-	void	readReqMsg(int client_sock);
-	void	headerParsing(void);
-	void	headerExtracting(char *, int);
+	size_t		request_line(void);
+	void		readReqMsg(int client_sock);
+	void		headerParsing(void);
+	void		headerExtracting(char *, int);
 
-	void	openAndWrite(const char* data, size_t size, bool creation_flag = false);
+	void		openAndWrite(const char* data, size_t size, bool creation_flag = false);
 
-	void	chunked_approach(const char *buffer, int bytes, bool c = false);
-	void	extractBodyContent(char *buffer, int bytes);
-	void	handleBodyRead(void);
+	void		chunked_approach(const char *buffer, int bytes, bool c = false);
+	void		extractBodyContent(char *buffer, int bytes);
+	void		handleBodyRead(void);
 
 	std::string	pathExtracting(void);
-	// std::string	fragmentExtracting(void);
 	std::string	queryExtracting(void);
 
 	// * location setter
@@ -125,12 +124,12 @@ public:
 	void	setPhysicalPath(void);
 
 	// * Getters
-	int									getReqState(void) const;
-	std::string							getURI(void) const;
-	const std::string&					getPath() const;
-	const std::string&					getQuery() const;
-	const std::string&					getMethod() const;
-	const std::string&					getPhysicalPath() const;
+	int											getReqState(void) const;
+	std::string									getURI(void) const;
+	const std::string&							getPath() const;
+	const std::string&							getQuery() const;
+	const std::string&							getMethod() const;
+	const std::string&							getPhysicalPath() const;
 	const std::map<std::string, std::string>&	getHeaderFields() const;
 
 	void	requestHandling(int client_sock);
