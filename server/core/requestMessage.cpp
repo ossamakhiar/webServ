@@ -155,8 +155,6 @@ void	requestMessage::setPhysicalPath(void)
 	if (path[path.length() - 1] == '/' && _path[0] == '/')
 		path = path.substr(0, path.length() - 1);
 	path += _path;
-
-	std::cout << "\e[1;32mPAAAAAAATH: \e[0m" << path << std::endl;
 	_rooted_path = path;
 }
 

@@ -92,3 +92,61 @@ int main() {
 
     return 0;
 }
+
+
+
+// void	bubbleSort(std::vector<int>& nums)
+// {
+// 	size_t	i, j;
+// 	int	tmp;
+
+// 	i = 0;
+// 	while (i < nums.size() - 1)
+// 	{
+// 		j = 0;
+// 		while (j < nums.size() - i - 1)
+// 		{
+// 			if (nums[j] > nums[j + 1])
+// 			{
+// 				// swapping
+// 				tmp = nums[j];
+// 				nums[j] = nums[j + 1];
+// 				nums[j + 1] = tmp;
+// 			}
+// 			j++;
+// 		}
+// 		i++;
+// 	}
+// }
+
+// int	main(void)
+// {
+// 	std::vector<int>	nums;
+
+// 	nums.push_back(12);
+// 	nums.push_back(10);
+// 	nums.push_back(1);
+// 	nums.push_back(2);
+// 	nums.push_back(-1);
+// 	nums.push_back(3);
+// 	nums.push_back(5);
+
+// 	for (size_t	i = 0; i < nums.size(); ++i)
+// 		std::cout << "tab[" << i << "]: " << nums[i] << " ";
+// 	std::cout << std::endl;
+// 	bubbleSort(nums);
+// 	for (size_t	i = 0; i < nums.size(); ++i)
+// 		std::cout << "tab[" << i << "]: " << nums[i] << " ";
+// 	std::cout << std::endl;
+// 	return (0);
+// }
+
+
+/*
+5 1 2 0 : 0, 0
+	1 5 2 0: 0, 1
+	1 2 5 0: 0, 2
+	1 2 0 5: 0, 3
+
+1 2 0 5: 
+*/ 

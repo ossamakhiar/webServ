@@ -112,7 +112,7 @@ std::string	Response::getScriptName() const
 void	Response::fillReasonPhrases(void)
 {
 	_reason_phrase[OK] = "Ok";
-	_reason_phrase[OK] = "Created";
+	_reason_phrase[CREATED] = "Created";
 	_reason_phrase[MOVED_PERMANENTLY] = "Moved Permanently";
 	_reason_phrase[FORBIDDEN] = "Forbidden";
 	_reason_phrase[BAD_REQUEST] = "Bad Request";
@@ -148,8 +148,7 @@ std::string	Response::validateRootPath(const std::string& requested_path)
 }
 
 void	Response::cgiHeaderExtracting(void)
-{	_reason_phrase[OK] = "Ok";
-
+{
 	int		read_bytes;
 	size_t	pos;
 	char	buffer[READ_BUFFER + 1];
@@ -200,6 +199,10 @@ bool	Response::checkCgiExistence(void)
 	return (true);
 }
 
+bool		Response::_isIndex(void) const
+{
+	return (!_index_full_path.empty());
+}
 
 
 
@@ -257,24 +260,25 @@ void	Response::directoryServing(const std::string& path)
 	std::ifstream	index_file;
 
 	// ** check index
-	if (!(index_path = checkIndex(path)).empty())
-	{
-		// ! serve the index page..
-		// ? open path and fill the body
-		index_file.open(index_path.c_str(), std::ios::in);
-		if (!index_file.good())
-			throw (INTERNAL_SERVER_ERROR);
-		while (std::getline(index_file, line))
-		{
-			_body += line;
-			if (!index_file.eof())
-				_body += "\n";
-		}
-		index_file.close();
-		return ;
-	}
+	// if (!(index_path = checkIndex(path)).empty())
+	// {
+	// 	// ! serve the index page..
+	// 	// ? open path and fill the body
+	// 	index_file.open(index_path.c_str(), std::ios::in);
+	// 	if (!index_file.good())
+	// 		throw (INTERNAL_SERVER_ERROR);
+	// 	while (std::getline(index_file, line))
+	// 	{
+	// 		_body += line;
+	// 		if (!index_file.eof())
+	// 			_body += "\n";
+	// 	}
+	// 	index_file.close();
+	// 	return ;
+	// }
 	directoryListing(path);
 }
+
 
 // **************** Respond - Directory requested [END] *************
 
@@ -330,7 +334,7 @@ void	Response::file_chunks_sending(void)
 		throw (INTERNAL_SERVER_ERROR);
 	write_bytes = write(_client_socket, buffer, read_bytes);
 	if (write_bytes == 0)
-		throw (-1); // here...
+		throw (-1); // here...bool		_isIndex(void) const
 	if (write_bytes == -1)
 		throw (INTERNAL_SERVER_ERROR);
 }
@@ -373,6 +377,8 @@ void	Response::fileServing(void)
 
 	rooted_path = _req->getPhysicalPath();
 	std::cout << "I'm here.. Good\n";
+	if (_isIndex())
+		rooted_path = _index_full_path;
 	if (_cgi_exists)
 	{
 		// set path to cgi output
@@ -382,6 +388,7 @@ void	Response::fileServing(void)
 	}
 	if (_request_method == "POST" && !_cgi_exists)
 		throw (CREATED);
+	std::cout << "\e[1;32mrooted path: \e[0m" << rooted_path << std::endl;
 	// maybe here i should check the cgi maybe, maybe...
 	_body_fd = open(rooted_path.c_str(), O_RDONLY);
 
@@ -398,9 +405,13 @@ void	Response::fileServing(void)
 // ** METHOD handlers
 void	Response::getHandler(void) // ? GET Request handler...
 {
-	if (PathVerifier::is_file(_req->getPhysicalPath()))
+	std::cout << std::boolalpha << _isIndex() << std::endl;
+	if (PathVerifier::is_file(_req->getPhysicalPath()) || _isIndex())
+	{
 		fileServing();
-	_stored_type = EXTERNAL_STORAGE;
+		return ;
+	}
+	// _stored_type = EXTERNAL_STORAGE;
 	if (PathVerifier::is_directory(_req->getPhysicalPath()))
 	{
 		directoryServing(_req->getPhysicalPath()); // ** server index, or directory listing on case of autoindex
@@ -421,6 +432,20 @@ void	Response::postHandler(void)
 		return ;
 	}
 	throw (FORBIDDEN);
+}
+
+void	Response::deleteHandler(void)
+{
+	std::string	path;
+
+	path = _req->getPhysicalPath();
+	if (PathVerifier::is_file(path))
+	{
+		if (access(path.c_str(), W_OK))
+			throw (FORBIDDEN);
+		unlink(path.c_str());
+	}
+	
 }
 
 
@@ -450,7 +475,8 @@ void	Response::DirectoryRequestedChecking(const std::string& path)
 	// // ? set type of body to Buffer type
 	// _stored_type = RAM_BUFFER;
 	// respond();
-	(void)path;
+
+	_index_full_path = checkIndex(path);
 }
 
 // CGI ON Cgi.cpp file ==> also body producer

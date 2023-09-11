@@ -59,19 +59,11 @@ void	Response::redirect_cgi_input(void)
 {
 	int	fd;
 
-	std::cout << ">>>>"  << _req->getPostBodyFile() << std::endl;
 	fd = open(_req->getPostBodyFile().c_str(), O_RDONLY);
-	std::cout << "fd:     >>>> " << fd << std::endl;
 	if (fd == -1)
-	{
-		std::cerr << "\e[1;31mcan't open file....\e[0m" << std::endl;
 		exit(EXIT_FAILURE);
-	}
 	if (dup2(fd, 0) == -1)
-	{
-		std::cerr << "\e[1;31mcan't dup....\e[0m" << std::endl;
 		exit(EXIT_FAILURE);
-	}
 }
 
 void	Response::cgi_handler(void)

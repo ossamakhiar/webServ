@@ -1,4 +1,4 @@
-<!-- <?php
+<?php
 session_start();
 // echo "<pre>\n";
 // var_dump($_SERVER);

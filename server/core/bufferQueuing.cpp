@@ -34,6 +34,10 @@ bufferQueuing&	bufferQueuing::operator=(const bufferQueuing& rhs)
 	if (this == &rhs)
 		return (*this);
 	buffer_queue = rhs.buffer_queue;
+	start = rhs.start;
+	size = rhs.size;
+	last_chunk = rhs.last_chunk;
+	size_extracted = rhs.size_extracted;
 	size = rhs.size;
 	return (*this);
 }
@@ -112,7 +116,25 @@ void	bufferQueuing::processAndShiftData(void)
 		i++;
 	}
 	// * idea : clear from 0 to the size that read
-	start += size + 2;
+	start += size + 2; // add 2 to skip CRLF in the end of the chunk
 	size_extracted = false;
 	processAndShiftData();
 }
+
+
+
+
+
+
+/*
+[chunk-size in hexadecimal]\r\n
+[chunk-content]\r\n
+
+example:
+1E\r\n
+Hello, world! This is an exa\r\n
+1D\r\n
+mple of chunked transfer encoding.\r\n
+0\r\n
+\r\n
+*/

@@ -59,6 +59,7 @@ private:
 
 	std::string					_redirection_path;
 	std::string					_resource_physical_path;
+	std::string					_index_full_path;
 
 	int							_body_fd;
 	std::string					_headers;
@@ -110,6 +111,7 @@ private:
 	// * methods handlers
 	void	getHandler(void);
 	void	postHandler(void);
+	void	deleteHandler(void);
 
 	// * HELPERS
 	void		fillReasonPhrases(void);
@@ -119,6 +121,7 @@ private:
 	void		setContentLength(void);
 	std::string	getScriptName() const;
 	void		setRequest(const requestMessage&, int);
+	bool		_isIndex(void) const;
 
 public:
 	Response();
