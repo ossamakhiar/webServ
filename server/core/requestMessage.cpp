@@ -21,6 +21,7 @@ requestMessage::requestMessage(std::vector<virtualServer*> &ends_v, virtualServe
 		_presistent_con(true), \
 		_content_len(0)
 {
+	_logical_path_len = 0;
 	handling_state = READING_REQ;
 }
 
@@ -145,16 +146,17 @@ void	requestMessage::setProperVS(void)
 
 void	requestMessage::setPhysicalPath(void)
 {
-	std::string	path;
+	std::string	path, path_to_serve;
 
+	path_to_serve = _path.substr(_logical_path_len, _path.length());
 	// ** case of there no location match the requested path, join it with the root of the server
 	path = _location->getRoot();
-	std::cout << ">>>>" << path << std::endl;
-	if (path[path.length() - 1] != '/' && _path[0] != '/')
+	std::cout << ">>>>" << path << "+++++" << _path << "+++ path to serve: " << path_to_serve << std::endl;
+	if (path[path.length() - 1] != '/' && path_to_serve[0] != '/')
 		path += "/";
-	if (path[path.length() - 1] == '/' && _path[0] == '/')
+	if (path[path.length() - 1] == '/' && path_to_serve[0] == '/')
 		path = path.substr(0, path.length() - 1);
-	path += _path;
+	path += path_to_serve;
 	_rooted_path = path;
 }
 
@@ -185,6 +187,7 @@ std::string	requestMessage::locationMatch(const std::map<std::string, locationBl
 			matches[len] = it->first;
 	if (matches.size() == 0)
 		return ("");
+	_logical_path_len = matches.rbegin()->first;
 	return (matches.rbegin()->second);
 }
 

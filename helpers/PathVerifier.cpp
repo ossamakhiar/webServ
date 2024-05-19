@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "PathVerifier.hpp"
+#include <iostream>
 
 bool	PathVerifier::is_file(const std::string& path)
 {
@@ -33,6 +34,7 @@ bool PathVerifier::is_directory(const std::string& path)
 bool PathVerifier::path_exists(const std::string& path)
 {
     struct stat fileStat;
+	// std::cout << "Checking for " << path << "/*-/-*/-*/-/\n";
     return (stat(path.c_str(), &fileStat) == 0);
 }
 

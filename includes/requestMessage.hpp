@@ -82,6 +82,10 @@ private:
 	std::string					_hostname; // ! make it mandatory :)
 	std::string					_method, _URI;
 
+	// This variable holds the length of the location that matchs the URI to remove
+	// it when it comes to serve it
+	size_t	_logical_path_len;
+
 
 	// ** private members function
 	size_t		request_line(void);
